@@ -102,20 +102,46 @@ The production build generated the application pages and API routes successfully
 - URLs such as `/login` and `/api/products` must be opened in a browser, for example `http://localhost:3001/login`.
 - Stripe checkout requires real test values for `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
 
-## Remaining Jalal Sons Domain Work
+## Remaining Work
 
-The current sample catalog uses placeholder grocery and household products. The real Jalal Sons website is a food-ordering platform, so the next domain-specific work should include:
+The items below are still pending and should be completed in this order.
 
-- Replace placeholder products with bakery, confectionery, pizza, snack, cake, and meal products.
+### 1. Match the Real Jalal Sons Domain
+
+- Replace the placeholder grocery and household products with bakery, confectionery, pizza, snack, cake, and meal products.
+- Add product options such as size, flavor, toppings, and quantity where required.
 - Add branches or store locations.
-- Add delivery versus pickup order type.
 - Add city, region, branch, and delivery address fields.
-- Add delivery fee and minimum-order rules if required by the real business flow.
-- Add customer order tracking and order status UI.
+- Add delivery versus pickup order type.
+- Add delivery fee, minimum-order, service-area, and estimated-delivery rules.
+
+### 2. Complete Ordering Features
+
+- Add customer order history and order-detail screens.
+- Add customer order tracking.
+- Add payment status and order status display.
+- Add checkout validation for address, branch, delivery type, and cart availability.
 - Add admin management for branches, products, categories, inventory, and orders.
-- Add automated API and checkout tests.
+
+### 3. Database and Deployment
+
 - Create tracked Prisma migrations on a fresh or dedicated development database.
-- Configure Stripe webhook forwarding for local payment testing.
+- Do not run `prisma migrate reset` on the existing Neon database because it deletes data.
+- Add production environment variables to Vercel.
+- Configure the production Stripe webhook URL.
+
+### 4. Testing and Operations
+
+- Add automated API tests for authentication, products, categories, cart, orders, and checkout.
+- Add checkout and Stripe webhook integration tests.
+- Configure Stripe CLI webhook forwarding for local testing.
+- Add error logging and monitoring for failed payments and orders.
+
+### Remaining Configuration
+
+- Add real test values for `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
+- Install Stripe CLI if local webhook testing is required.
+- Resolve the duplicate lockfile warning by removing the unrelated parent lockfile or configuring `outputFileTracingRoot`.
 
 ## Local Run Commands
 
