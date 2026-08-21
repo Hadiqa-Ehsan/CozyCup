@@ -1,6 +1,6 @@
 import { listProducts } from "@/lib/services/product-service";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { ProductCard } from "@/components/product-card";
 
 export const revalidate = 60; // ISR: refresh product list every 60s at most
 
@@ -23,13 +23,17 @@ export default async function Home() {
                 <CardTitle>{product.name}</CardTitle>
               </CardHeader>
               <CardContent>
+                <div
+                  className="mb-4 aspect-[4/3] rounded-md bg-cover bg-center"
+                  style={{ backgroundImage: product.imageUrl ? `url(${product.imageUrl})` : undefined }}
+                />
                 <p className="text-sm text-muted-foreground">{product.description}</p>
                 <p className="mt-2 font-medium">
                   {(product.priceCents / 100).toFixed(2)} {product.currency}
                 </p>
               </CardContent>
               <CardFooter>
-                <Button size="sm">Add to cart</Button>
+                <ProductCard product={product} />
               </CardFooter>
             </Card>
           ))}

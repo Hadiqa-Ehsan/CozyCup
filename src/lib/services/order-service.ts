@@ -88,3 +88,42 @@ export async function createOrderFromCart(userId: string) {
 
   return order;
 }
+
+export async function attachStripeSession(orderId: string, stripeSessionId: string) {
+  return prisma.order.update({
+    where: { id: orderId },
+    data: { stripeSessionId },
+  });
+}
+
+export async function markOrderPaid(orderId: string) {
+  return prisma.order.updateMany({
+    where: { id: orderId, status: "PENDING" },
+    data: { status: "PAID" },
+  });
+}
+
+export async function cancelPendingOrder(orderId: string) {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findFirst({
+      where: { id: orderId, status: "PENDING" },
+      include: { items: true },
+    });
+
+    if (!order) return false;
+
+    await tx.order.update({
+      where: { id: order.id },
+      data: { status: "CANCELLED" },
+    });
+
+    for (const item of order.items) {
+      await tx.product.update({
+        where: { id: item.productId },
+        data: { stock: { increment: item.quantity } },
+      });
+    }
+
+    return true;
+  });
+}

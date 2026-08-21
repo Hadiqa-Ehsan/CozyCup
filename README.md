@@ -29,7 +29,8 @@ cp .env.example .env
 Fill in:
 - `DATABASE_URL` — from step 2
 - `AUTH_SECRET` — generate with `npx auth secret`
-- Stripe keys — optional until you build checkout; get free test keys at https://dashboard.stripe.com/test/apikeys
+- `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` — test keys from https://dashboard.stripe.com/test/apikeys
+- `NEXT_PUBLIC_APP_URL` — the public app URL, or `http://localhost:3000` locally
 
 ## 4. Push the schema and seed sample data
 
@@ -50,6 +51,11 @@ npm run dev
 Visit http://localhost:3000 — you should see the seeded products. Visit `/login` for the
 Auth.js credentials sign-in form (you'll need to create a user with a hashed password first —
 see `src/lib/auth.ts` for the `bcrypt.compare` flow it expects).
+
+Authenticated clients can `POST /api/checkout` to create a Stripe Checkout session. Configure
+Stripe to send `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+`checkout.session.expired`, and `checkout.session.async_payment_failed` events to
+`/api/stripe/webhook`.
 
 ## 6. Explore Prisma Studio (free visual DB editor)
 
