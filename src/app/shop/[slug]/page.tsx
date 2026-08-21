@@ -1,10 +1,6 @@
 import { notFound } from "next/navigation";
-import { listCategoryTree, getCategoryBySlug } from "@/lib/services/category-service";
-import { listProducts } from "@/lib/services/product-service";
 import { ShopLayout } from "@/components/shop-layout";
-import type { ProductSummary } from "@/lib/types";
-
-export const revalidate = 60;
+import { mockCategories, mockProducts } from "@/lib/mock-data";
 
 export default async function CategoryPage({
   params,
@@ -12,19 +8,20 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [categories, category, products] = await Promise.all([
-    listCategoryTree(),
-    getCategoryBySlug(slug),
-    listProducts({ categorySlug: slug }),
-  ]);
-
+  
+  // Find category by slug
+  const category = mockCategories.find((c) => c.slug === slug);
+  
   if (!category) notFound();
+
+  // Filter products by category
+  const products = mockProducts.filter((p) => p.categorySlug === slug);
 
   return (
     <ShopLayout
       title={category.name}
-      categories={categories}
-      products={products as ProductSummary[]}
+      categories={mockCategories}
+      products={products}
       activeSlug={slug}
     />
   );
