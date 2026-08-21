@@ -62,7 +62,7 @@ export function CategoryProductScroll({
         </h2>
       </div>
 
-      {/* Category Banner Image - FULL WIDTH & TALL like original site */}
+      {/* Category Banner Image - Full Width */}
       <div 
         className="relative w-full mb-6 overflow-hidden shadow-md" 
         style={{ 

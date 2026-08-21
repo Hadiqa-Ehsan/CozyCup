@@ -1,79 +1,102 @@
 # Jalal Sons — Full-Stack E-Commerce Clone
 
-Stack: **Next.js 15 (App Router) + TypeScript · Prisma + PostgreSQL · Auth.js v5 · Zod · React Hook Form · Zustand · shadcn/ui**
+Stack: **Next.js 15 (App Router) + TypeScript · Prisma + PostgreSQL · Auth.js v5 · Zod · React Hook Form · Zustand · shadcn/ui · Stripe**
 
-An unofficial, functional clone of jalalsons.com.pk's public storefront and ordering flow, built as
-a portfolio/learning project. Not affiliated with the real Jalal Sons.
+This matches the tech stack recommendation doc exactly, pinned to **Next.js 15** (not 16) because
+the caching plan (`revalidateTag`, ISR) was evaluated against Next 15's API.
 
 ## 1. Install dependencies
+
 ```bash
 npm install
 ```
-`postinstall` automatically runs `prisma generate`.
+
+`postinstall` automatically runs `prisma generate` for you.
 
 ## 2. Set up your free PostgreSQL database
-- **Neon** — https://neon.tech (free tier)
-- **Supabase** — https://supabase.com (free tier)
 
-## 3. Configure environment
+Pick **one**:
+
+- **Neon** — https://neon.tech → free tier, create a project, copy the pooled connection string
+- **Supabase** — https://supabase.com → free tier, create a project → Settings → Database → connection string
+
+## 3. Configure environment variables
+
 ```bash
 cp .env.example .env
 ```
-Fill in `DATABASE_URL` and generate `AUTH_SECRET` with `npx auth secret`.
 
-## 4. Build the database and load sample data
+Fill in:
+- `DATABASE_URL` — from step 2
+- `AUTH_SECRET` — generate with `npx auth secret`
+- `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` — test keys from https://dashboard.stripe.com/test/apikeys
+- `NEXT_PUBLIC_APP_URL` — the public app URL, or `http://localhost:3000` locally
+
+## 4. Push the schema and seed sample data
+
 ```bash
-npm run db:push
-npm run db:seed
+npm run db:push     # creates tables from prisma/schema.prisma
+npm run db:seed     # adds sample categories/products
 ```
 
-## 5. Run it
+Use `npm run db:migrate` instead of `db:push` once you want tracked migration history (recommended
+before you consider the schema "stable").
+
+## 5. Run the dev server
+
 ```bash
 npm run dev
 ```
-Visit http://localhost:3000
 
-## Pages / routes
+Visit http://localhost:3000 — you should see the seeded products. Visit `/login` for the
+Auth.js credentials sign-in form (you'll need to create a user with a hashed password first —
+see `src/lib/auth.ts` for the `bcrypt.compare` flow it expects).
 
-| Route | Purpose |
-|---|---|
-| `/` | Homepage — hero, category grid, deals, featured products |
-| `/shop` | All products, sidebar category/subcategory filter |
-| `/shop/[slug]` | Category or subcategory listing |
-| `/product/[slug]` | Product detail + add to cart |
-| `/search?q=` | Search results |
-| `/deals` | Discounted products |
-| `/cart` | Cart with quantity edit/remove |
-| `/branches` | Select branch + Delivery/Pickup |
-| `/checkout` | Checkout form (requires login + branch selected) |
-| `/order-confirmation/[orderId]` | Order confirmation |
-| `/login`, `/signup` | Auth (credentials, JWT session) |
-| `/account` | Order history |
-| `/contact` | Contact form (UI only — TBD backend) |
-| `/privacy-policy`, `/terms` | Sample legal pages |
+Authenticated clients can `POST /api/checkout` to create a Stripe Checkout session. Configure
+Stripe to send `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+`checkout.session.expired`, and `checkout.session.async_payment_failed` events to
+`/api/stripe/webhook`.
 
-## What's real vs. sample data
+## 6. Explore Prisma Studio (free visual DB editor)
 
-- **Category names** — real, taken from Jalal Sons' live category listing (Beverages, Frozen
-  Foods, Bakery, etc.).
-- **Products & prices** — a representative sample set (~45 products). A handful of prices (K&N
-  items, Olper's/Prema milk, JS Rusk) are pulled from a verified real listing; the rest are
-  realistic estimates. The full live catalog (1000s of SKUs) is not reproduced.
-- **Branches** — SAMPLE/placeholder only. The real branch list is loaded dynamically by the live
-  site in a way this project couldn't scrape. Clearly marked TBD in the seed file and UI.
-- **Payment** — Cash on Delivery only, matching the real site's "online payments not supported for
-  grocery purchases" behavior. No payment gateway is integrated.
-- **Contact form** — UI only; doesn't send anywhere yet (marked TBD in the page itself).
+```bash
+npm run db:studio
+```
 
-## Architecture notes
+## Project structure
 
-- `/lib/services` — pure business-logic functions; Route Handlers stay thin and just call these.
-- Cart and branch/fulfillment selection persist client-side via **Zustand + localStorage**.
-- Auth sessions last 30 days for normal shoppers (the original tech-stack doc's 15-minute JWT
-  suggestion was written for **admin** account security — that's noted in `src/lib/auth.ts` in case
-  an admin panel gets built later).
-- Money stored as integer paisa/cents (`priceCents`) — never floats.
+```
+src/
+  app/                    Routes (App Router)
+    api/
+      auth/[...nextauth]/ Auth.js route handler
+      products/           Example REST-style Route Handler
+    login/                React Hook Form + Zod login page
+    page.tsx              Homepage — Server Component, fetches via Prisma directly
+  components/ui/          shadcn/ui primitives (Button, Input, Label, Card)
+  lib/
+    auth.ts               Auth.js v5 config (JWT, 15-min sessions, credentials provider)
+    prisma.ts             Prisma client singleton
+    services/              Pure business-logic functions — keeps Route Handlers thin
+    validations/           Zod schemas
+  store/
+    cart-store.ts          Zustand cart state (persisted to localStorage)
+prisma/
+  schema.prisma            Data model: User/Account/Session (Auth.js), Category, Product, Order, OrderItem
+  seed.ts                  Sample data
+```
 
 ## Deploying (still free)
-Push to GitHub → import on vercel.com (free Hobby tier) → add the same `.env` variables in
-Vercel's project settings.
+
+1. Push this repo to GitHub
+2. Import it on https://vercel.com (free Hobby tier — non-commercial use)
+3. Add the same environment variables from `.env` in Vercel's project settings
+4. Vercel auto-detects Next.js and deploys on every push
+
+## Notes
+
+- Money is stored as **integer cents** (`priceCents`) everywhere — never floats — to avoid rounding bugs.
+- `revalidateTag("products")` in `api/products/route.ts` busts the cached product list the moment
+  something changes, per the doc's caching strategy.
+- The `/lib/services` layer is intentional — as the project grows (checkout, inventory, admin), keep
+  adding pure functions there instead of putting logic directly in Route Handlers.

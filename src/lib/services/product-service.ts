@@ -1,35 +1,27 @@
 import { prisma } from "@/lib/prisma";
-import { productSchema, type ProductInput } from "@/lib/validations/product";
+import {
+  productSchema,
+  productUpdateSchema,
+  type ProductInput,
+  type ProductUpdateInput,
+} from "@/lib/validations/product";
 
 // Pure service functions. Route Handlers and Server Actions stay thin and
 // just call these — keeps business logic out of the request layer as the
 // doc's risk-mitigation section recommends.
 
 export async function listProducts(params?: { categorySlug?: string; query?: string }) {
-  // A category can be a parent (e.g. "Bakery") — in that case include
-  // products from its subcategories too.
-  let categoryIds: string[] | undefined;
-  if (params?.categorySlug) {
-    const category = (await prisma.category.findUnique({
-      where: { slug: params.categorySlug },
-      include: { children: true },
-    })) as { id: string; children: { id: string }[] } | null;
-    if (category) {
-      categoryIds = [category.id, ...category.children.map((c) => c.id)];
-    } else {
-      categoryIds = ["__none__"]; // unknown slug -> no results
-    }
-  }
-
   return prisma.product.findMany({
     where: {
-      ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
+      ...(params?.categorySlug
+        ? { category: { slug: params.categorySlug } }
+        : {}),
       ...(params?.query
         ? { name: { contains: params.query, mode: "insensitive" } }
         : {}),
     },
     include: { category: true },
-    orderBy: { name: "asc" },
+    orderBy: { createdAt: "desc" },
   });
 }
 
@@ -40,25 +32,20 @@ export async function getProductBySlug(slug: string) {
   });
 }
 
-export async function listRelatedProducts(categoryId: string, excludeProductId: string) {
-  return prisma.product.findMany({
-    where: { categoryId, id: { not: excludeProductId } },
-    take: 6,
-    orderBy: { name: "asc" },
+export async function getProductById(id: string) {
+  return prisma.product.findUnique({
+    where: { id },
+    include: { category: true },
   });
 }
 
-export async function listFeaturedProducts() {
-  return prisma.product.findMany({
-    where: { isFeatured: true },
-    take: 8,
-    orderBy: { name: "asc" },
-  });
-}
+export async function listProductsByCategoryId(categoryId: string) {
+  const category = await prisma.category.findUnique({ where: { id: categoryId } });
+  if (!category) return null;
 
-export async function listDealProducts() {
   return prisma.product.findMany({
-    where: { isDeal: true },
+    where: { categoryId },
+    include: { category: true },
     orderBy: { name: "asc" },
   });
 }
@@ -74,4 +61,13 @@ export async function updateStock(productId: string, delta: number) {
     where: { id: productId },
     data: { stock: { increment: delta } },
   });
+}
+
+export async function updateProduct(id: string, input: ProductUpdateInput) {
+  const data = productUpdateSchema.parse(input);
+  return prisma.product.update({ where: { id }, data });
+}
+
+export async function deleteProduct(id: string) {
+  return prisma.product.delete({ where: { id } });
 }
