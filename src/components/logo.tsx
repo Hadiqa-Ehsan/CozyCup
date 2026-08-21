@@ -1,19 +1,20 @@
-// Placeholder logo — a red circle with a stylized "J" script mark, inspired
-// by the real Jalal Sons brand color/shape but NOT a reproduction of their
-// actual trademarked logo artwork (which this project has no rights to use).
-// Swap in the real logo file yourself if you have rights to use it — just
-// replace this component's contents with an <img src="/logo.png" /> tag.
+import Link from "next/link";
+
 export function Logo({ size = 40 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#cc0000" />
-      <path
-        d="M24 10c0 0-1 2-1 5v10c0 3-2 5-5 5s-5-2-5-5"
-        stroke="#ffffff"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        fill="none"
-      />
-    </svg>
+    <Link href="/" className="flex-shrink-0">
+      <div className="flex items-center gap-2">
+        <div 
+          className="flex items-center justify-center rounded-full bg-[#C8102E] text-white"
+          style={{ width: size, height: size }}
+        >
+          <svg viewBox="0 0 100 100" className="w-3/4 h-3/4 fill-current">
+            <path d="M50,0 A50,50 0 1,0 100,50 A50,50 0 0,0 50,0 Z M50,90 A40,40 0 1,1 90,50 A40,40 0 0,1 50,90 Z" />
+            <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fontSize="38" fontWeight="bold" fontFamily="serif" fontStyle="italic">JS</text>
+          </svg>
+        </div>
+        <span className="hidden text-xl font-bold text-[#C8102E] sm:block">Jalal Sons</span>
+      </div>
+    </Link>
   );
 }
