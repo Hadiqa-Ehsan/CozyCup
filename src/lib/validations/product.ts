@@ -11,4 +11,10 @@ export const productSchema = z.object({
   categoryId: z.string().cuid().optional(),
 });
 
+export const productUpdateSchema = productSchema.partial().refine(
+  (input) => Object.keys(input).length > 0,
+  "At least one field is required"
+);
+
 export type ProductInput = z.infer<typeof productSchema>;
+export type ProductUpdateInput = z.infer<typeof productUpdateSchema>;

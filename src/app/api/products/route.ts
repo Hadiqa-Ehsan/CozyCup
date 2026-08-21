@@ -3,6 +3,7 @@ import { z } from "zod";
 import { listProducts, createProduct } from "@/lib/services/product-service";
 import { productSchema } from "@/lib/validations/product";
 import { revalidateTag } from "next/cache";
+import { auth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -14,6 +15,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
     const body = await request.json();
     const input = productSchema.parse(body);

@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import { productSchema, type ProductInput } from "@/lib/validations/product";
+import {
+  productSchema,
+  productUpdateSchema,
+  type ProductInput,
+  type ProductUpdateInput,
+} from "@/lib/validations/product";
 
 // Pure service functions. Route Handlers and Server Actions stay thin and
 // just call these — keeps business logic out of the request layer as the
@@ -27,6 +32,24 @@ export async function getProductBySlug(slug: string) {
   });
 }
 
+export async function getProductById(id: string) {
+  return prisma.product.findUnique({
+    where: { id },
+    include: { category: true },
+  });
+}
+
+export async function listProductsByCategoryId(categoryId: string) {
+  const category = await prisma.category.findUnique({ where: { id: categoryId } });
+  if (!category) return null;
+
+  return prisma.product.findMany({
+    where: { categoryId },
+    include: { category: true },
+    orderBy: { name: "asc" },
+  });
+}
+
 export async function createProduct(input: ProductInput) {
   const data = productSchema.parse(input);
   return prisma.product.create({ data });
@@ -38,4 +61,13 @@ export async function updateStock(productId: string, delta: number) {
     where: { id: productId },
     data: { stock: { increment: delta } },
   });
+}
+
+export async function updateProduct(id: string, input: ProductUpdateInput) {
+  const data = productUpdateSchema.parse(input);
+  return prisma.product.update({ where: { id }, data });
+}
+
+export async function deleteProduct(id: string) {
+  return prisma.product.delete({ where: { id } });
 }
