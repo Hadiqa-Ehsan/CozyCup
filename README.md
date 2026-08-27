@@ -92,6 +92,10 @@ prisma/
 2. Import it on https://vercel.com (free Hobby tier — non-commercial use)
 3. Add the same environment variables from `.env` in Vercel's project settings
 4. Vercel auto-detects Next.js and deploys on every push
+5. npm run build
+6. npx --yes vercel --prod
+7. https://jalalsons-clone.vercel.app
+8. 
 
 ## Notes
 
