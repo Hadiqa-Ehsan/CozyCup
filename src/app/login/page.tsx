@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -18,7 +18,18 @@ const loginSchema = z.object({
 type LoginInput = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const [serverError, setServerError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/";
+
   const {
     register,
     handleSubmit,
@@ -33,34 +44,47 @@ export default function LoginPage() {
       redirect: false,
     });
     if (res?.error) setServerError("Invalid email or password.");
-    else window.location.href = "/";
+    else window.location.href = next;
   }
 
   return (
     <main className="mx-auto flex min-h-[80vh] max-w-sm flex-col justify-center px-6">
-      <h1 className="mb-6 text-xl font-semibold">Sign in</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" {...register("email")} />
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
-          )}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" {...register("password")} />
-          {errors.password && (
-            <p className="text-sm text-destructive">{errors.password.message}</p>
-          )}
-        </div>
-        {serverError && <p className="text-sm text-destructive">{serverError}</p>}
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Signing in…" : "Sign in"}
-        </Button>
-      </form>
-      <p className="mt-4 text-sm text-muted-foreground">
-        New customer? <Link className="underline" href="/register">Create an account</Link>
+      <div className="rounded-lg border p-8 shadow-sm">
+        <h1 className="mb-1 text-center text-xl font-semibold">Enter your details</h1>
+        <p className="mb-6 text-center text-sm text-muted-foreground">
+          Please enter your email and password
+        </p>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Input id="email" type="email" placeholder="Enter your email address" {...register("email")} />
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email.message}</p>
+            )}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Input id="password" type="password" placeholder="Enter your password" {...register("password")} />
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password.message}</p>
+            )}
+          </div>
+
+          <Link href="/contact" className="text-sm text-primary hover:underline">
+            Need help?
+          </Link>
+
+          {serverError && <p className="text-sm text-destructive">{serverError}</p>}
+
+          <Button type="submit" disabled={isSubmitting} className="mt-2">
+            {isSubmitting ? "Signing in…" : "Login"}
+          </Button>
+        </form>
+      </div>
+
+      <p className="mt-4 text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link href="/signup" className="text-primary hover:underline">
+          Sign up
+        </Link>
       </p>
     </main>
   );

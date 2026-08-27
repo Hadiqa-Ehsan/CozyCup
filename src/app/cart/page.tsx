@@ -1,59 +1,83 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cart-store";
+import { formatPrice } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 export default function CartPage() {
-  const { items, setQuantity, removeItem, totalCents } = useCartStore();
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { items, removeItem, setQuantity, totalCents } = useCartStore();
 
-  async function checkout() {
-    setLoading(true);
-    setError(null);
-    const response = await fetch("/api/checkout", { method: "POST" });
-    const result = await response.json().catch(() => null);
-    setLoading(false);
-    if (!response.ok) {
-      setError(result?.error ?? "Could not start checkout.");
-      return;
-    }
-    window.location.href = result.checkoutUrl;
-  }
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null; // avoid hydration mismatch with persisted store
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Your cart</h1>
-        <Link className="text-sm underline" href="/">Continue shopping</Link>
-      </div>
+    <main className="mx-auto max-w-4xl px-6 py-8">
+      <h1 className="mb-6 text-2xl font-semibold">Your Cart</h1>
+
       {items.length === 0 ? (
-        <p className="text-muted-foreground">Your cart is empty.</p>
+        <div className="rounded-lg border p-8 text-center">
+          <p className="text-muted-foreground">Your cart is empty.</p>
+          <Button asChild className="mt-4">
+            <Link href="/shop">Browse products</Link>
+          </Button>
+        </div>
       ) : (
-        <div className="space-y-4">
-          {items.map((item) => (
-            <div className="flex items-center justify-between border-b pb-4" key={item.productId}>
-              <div>
-                <p className="font-medium">{item.name}</p>
-                <p className="text-sm text-muted-foreground">{(item.priceCents / 100).toFixed(2)}</p>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col divide-y rounded-lg border">
+            {items.map((item) => (
+              <div key={item.productId} className="flex items-center justify-between gap-4 p-4">
+                <div className="flex-1">
+                  <p className="font-medium">{item.name}</p>
+                  <p className="text-sm text-muted-foreground">{formatPrice(item.priceCents)} each</p>
+                </div>
+
+                <div className="flex items-center rounded-md border">
+                  <button
+                    className="px-3 py-1.5 text-lg"
+                    onClick={() => setQuantity(item.productId, Math.max(1, item.quantity - 1))}
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center text-sm">{item.quantity}</span>
+                  <button
+                    className="px-3 py-1.5 text-lg"
+                    onClick={() => setQuantity(item.productId, item.quantity + 1)}
+                  >
+                    +
+                  </button>
+                </div>
+
+                <p className="w-24 text-right font-medium">
+                  {formatPrice(item.priceCents * item.quantity)}
+                </p>
+
+                <button
+                  className="text-sm text-destructive hover:underline"
+                  onClick={() => removeItem(item.productId)}
+                >
+                  Remove
+                </button>
               </div>
-              <div className="flex items-center gap-2">
-                <input
-                  className="h-9 w-16 rounded-md border px-2"
-                  type="number"
-                  min="1"
-                  value={item.quantity}
-                  onChange={(event) => setQuantity(item.productId, Math.max(1, Number(event.target.value)))}
-                />
-                <Button variant="ghost" onClick={() => removeItem(item.productId)}>Remove</Button>
-              </div>
-            </div>
-          ))}
-          <p className="text-right text-lg font-semibold">Total: {(totalCents() / 100).toFixed(2)}</p>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <div className="flex justify-end"><Button onClick={checkout} disabled={loading}>{loading ? "Opening checkout..." : "Checkout"}</Button></div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <span className="text-lg font-semibold">Total</span>
+            <span className="text-lg font-semibold">{formatPrice(totalCents())}</span>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <Button asChild variant="outline">
+              <Link href="/shop">Continue shopping</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/checkout">Proceed to checkout</Link>
+            </Button>
+          </div>
         </div>
       )}
     </main>

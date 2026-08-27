@@ -16,6 +16,7 @@ type CartState = {
   setQuantity: (productId: string, quantity: number) => void;
   clear: () => void;
   totalCents: () => number;
+  itemCount: () => number;
 };
 
 export const useCartStore = create<CartState>()(
@@ -47,6 +48,7 @@ export const useCartStore = create<CartState>()(
       clear: () => set({ items: [] }),
       totalCents: () =>
         get().items.reduce((sum, i) => sum + i.priceCents * i.quantity, 0),
+      itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),
     { name: "jalal-sons-cart" }
   )

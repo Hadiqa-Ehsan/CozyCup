@@ -8,8 +8,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
-    // Short-lived sessions per the doc's risk mitigation for JWT revocation delay.
-    maxAge: 15 * 60, // 15 minutes; extend with a refresh flow as needed
+    // NOTE: the original doc suggested ~15-minute JWTs as a security
+    // mitigation, but that's aimed at ADMIN accounts specifically (fast
+    // revocation of a compromised admin). For regular shopper accounts,
+    // logging customers out every 15 minutes mid-checkout is bad UX, so
+    // customer sessions use a normal 30-day length here. If/when an admin
+    // panel is built, give ADMIN-role sessions the short 15-min lifetime
+    // instead, per the doc's original recommendation.
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   providers: [
     Credentials({
@@ -39,11 +45,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     jwt({ token, user }) {
-      if (user) token.role = (user as { role?: string }).role;
+      if (user) {
+        token.id = user.id;
+        token.role = (user as { role?: string }).role;
+      }
       return token;
     },
     session({ session, token }) {
-      if (session.user) (session.user as { role?: string }).role = token.role as string;
+      if (session.user) {
+        session.user.id = token.id as string;
+        (session.user as { role?: string }).role = token.role as string;
+      }
       return session;
     },
   },
