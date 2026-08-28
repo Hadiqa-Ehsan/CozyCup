@@ -26,8 +26,6 @@ interface CategoryProductScrollProps {
   bannerImage: string | string[];
   products: Product[];
   viewAllLink?: string;
-
-  // NEW: Base path for product/category cards
   productLinkPrefix?: string;
 }
 
@@ -35,19 +33,13 @@ export function CategoryProductScroll({
   categoryName,
   bannerImage,
   products,
-  viewAllLink,
   productLinkPrefix,
 }: CategoryProductScrollProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-
   const addItem = useCartStore((s) => s.addItem);
-
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
 
-  const bannerList = Array.isArray(bannerImage)
-    ? bannerImage
-    : [bannerImage];
-
+  const bannerList = Array.isArray(bannerImage) ? bannerImage : [bannerImage];
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   const toggleWishlist = (productId: string) => {
@@ -60,9 +52,7 @@ export function CategoryProductScroll({
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
       const { current } = scrollRef;
-
       const scrollAmount = 320;
-
       current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -82,23 +72,10 @@ export function CategoryProductScroll({
     );
   };
 
-  /*
-   * Product URL
-   *
-   * Bakery + Bread:
-   * /shop/bakery/bread
-   *
-   * Dairy + Fresh Milk:
-   * /shop/dairy/fresh-milk
-   *
-   * etc.
-   */
   const getProductLink = (productSlug: string) => {
     if (productLinkPrefix) {
       return `${productLinkPrefix}/${productSlug}`;
     }
-
-    // Fallback for any component using the old behavior
     return `/product/${productSlug}`;
   };
 
@@ -107,30 +84,24 @@ export function CategoryProductScroll({
       {/* Category Name */}
       <div className="relative mb-8 flex items-center justify-center">
         <div className="absolute left-0 right-0 border-t border-[#D4C9B8]" />
-
         <h2 className="relative bg-[#F3EDD8] px-4 text-2xl font-bold text-[#242222]">
           {categoryName}
         </h2>
-
-        {viewAllLink && (
-          <Link
-            href={viewAllLink}
-            className="absolute right-0 text-xs font-bold text-[#242222] hover:text-[#A87A53] hover:underline"
-          >
-            View All →
-          </Link>
-        )}
       </div>
 
-      {/* Category Banner */}
-      <div className="relative mb-6 h-[320px] w-full overflow-hidden rounded-2xl bg-[#242222] shadow-md">
-        <Image
-          src={bannerList[currentBannerIndex]}
-          alt={categoryName}
-          fill
-          className="object-cover object-center"
-          priority
-        />
+      {/* Category Banner - Fixed container height & sizing */}
+      <div className="relative mb-6 w-full overflow-hidden rounded-2xl bg-[#242222] shadow-md">
+        <div className="relative w-full h-[180px] sm:h-[240px] md:h-[300px]">
+          <Image
+            key={currentBannerIndex}
+            src={bannerList[currentBannerIndex]}
+            alt={categoryName}
+            fill
+            sizes="(max-width: 768px) 100vw, 1200px"
+            className="object-cover object-center scale-x-[1.25] scale-y-[1.1]"
+            priority
+          />
+        </div>
 
         {/* Previous Banner */}
         {bannerList.length > 1 && (
@@ -217,6 +188,7 @@ export function CategoryProductScroll({
                           src={product.image}
                           alt={product.name}
                           fill
+                          sizes="170px"
                           className="object-cover"
                         />
                       ) : (
