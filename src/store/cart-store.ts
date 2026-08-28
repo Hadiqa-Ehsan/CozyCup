@@ -1,55 +1,101 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type CartItem = {
+export interface CartItem {
+  id: string;
   productId: string;
   name: string;
-  priceCents: number;
-  imageUrl?: string;
+  price: number;
   quantity: number;
-};
+  image?: string;
+}
 
-type CartState = {
+interface AddItemPayload {
+  id?: string;
+  productId?: string;
+  name: string;
+  price?: number;
+  priceCents?: number;
+  image?: string;
+  imageUrl?: string;
+}
+
+interface CartStore {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  setQuantity: (productId: string, quantity: number) => void;
-  clear: () => void;
-  totalCents: () => number;
-  itemCount: () => number;
-};
+  addItem: (product: AddItemPayload) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  clearCart: () => void;
+  totalItems: () => number;
+  totalPrice: () => number;
+}
 
-export const useCartStore = create<CartState>()(
+export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      addItem: (item, quantity = 1) =>
-        set((state) => {
-          const existing = state.items.find((i) => i.productId === item.productId);
-          if (existing) {
-            return {
-              items: state.items.map((i) =>
-                i.productId === item.productId
-                  ? { ...i, quantity: i.quantity + quantity }
-                  : i
-              ),
-            };
-          }
-          return { items: [...state.items, { ...item, quantity }] };
-        }),
-      removeItem: (productId) =>
-        set((state) => ({ items: state.items.filter((i) => i.productId !== productId) })),
-      setQuantity: (productId, quantity) =>
-        set((state) => ({
-          items: state.items.map((i) =>
-            i.productId === productId ? { ...i, quantity } : i
+
+      addItem: (product) => {
+        const { items } = get();
+        const targetId = product.id || product.productId;
+        if (!targetId) return;
+
+        const existingItem = items.find((item) => item.productId === targetId);
+
+        // Calculate price in rupees from either price or priceCents
+        const rawPrice = product.price ?? (product.priceCents ? product.priceCents / 100 : 0);
+        const image = product.image || product.imageUrl || "";
+
+        if (existingItem) {
+          const updatedItems = items.map((item) =>
+            item.productId === targetId
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+          set({ items: updatedItems });
+        } else {
+          const newItem: CartItem = {
+            id: targetId,
+            productId: targetId,
+            name: product.name || "Product",
+            price: rawPrice,
+            quantity: 1,
+            image: image,
+          };
+          set({ items: [...items, newItem] });
+        }
+      },
+
+      removeItem: (id) => {
+        set({ items: get().items.filter((item) => item.id !== id) });
+      },
+
+      updateQuantity: (id, quantity) => {
+        if (quantity <= 0) {
+          get().removeItem(id);
+          return;
+        }
+        set({
+          items: get().items.map((item) =>
+            item.id === id ? { ...item, quantity } : item
           ),
-        })),
-      clear: () => set({ items: [] }),
-      totalCents: () =>
-        get().items.reduce((sum, i) => sum + i.priceCents * i.quantity, 0),
-      itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
+        });
+      },
+
+      clearCart: () => set({ items: [] }),
+
+      totalItems: () => {
+        return get().items.reduce((total, item) => total + item.quantity, 0);
+      },
+
+      totalPrice: () => {
+        return get().items.reduce((total, item) => {
+          return total + (item.price || 0) * item.quantity;
+        }, 0);
+      },
     }),
-    { name: "jalal-sons-cart" }
+    {
+      name: "cart-storage",
+    }
   )
 );

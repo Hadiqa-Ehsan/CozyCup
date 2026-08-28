@@ -4,44 +4,44 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
-  --card: #ffffff;
-  --card-foreground: #1a1a1a;
-  --primary: #cc0000;
-  --primary-foreground: #ffffff;
-  --secondary: #fdf2f2;
-  --secondary-foreground: #cc0000;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --accent: #fdf2f2;
-  --accent-foreground: #cc0000;
+  --background: #F3EDD8;
+  --foreground: #242222;
+  --card: #F3EDD8;
+  --card-foreground: #242222;
+  --primary: #BDD390;
+  --primary-foreground: #242222;
+  --secondary: #A87A53;
+  --secondary-foreground: #ffffff;
+  --muted: #E8E3CC;
+  --muted-foreground: #242222;
+  --accent: #BDD390;
+  --accent-foreground: #242222;
   --destructive: #dc2626;
   --destructive-foreground: #fafafa;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #cc0000;
+  --border: #D4C9B8;
+  --input: #D4C9B8;
+  --ring: #242222;
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  --card: #0a0a0a;
-  --card-foreground: #fafafa;
-  --primary: #fafafa;
-  --primary-foreground: #171717;
-  --secondary: #262626;
-  --secondary-foreground: #fafafa;
-  --muted: #262626;
-  --muted-foreground: #a3a3a3;
-  --accent: #262626;
-  --accent-foreground: #fafafa;
+  --background: #242222;
+  --foreground: #F3EDD8;
+  --card: #242222;
+  --card-foreground: #F3EDD8;
+  --primary: #BDD390;
+  --primary-foreground: #242222;
+  --secondary: #A87A53;
+  --secondary-foreground: #ffffff;
+  --muted: #3a3737;
+  --muted-foreground: #F3EDD8;
+  --accent: #BDD390;
+  --accent-foreground: #242222;
   --destructive: #7f1d1d;
   --destructive-foreground: #fafafa;
-  --border: #262626;
-  --input: #262626;
-  --ring: #525252;
+  --border: #3a3737;
+  --input: #3a3737;
+  --ring: #BDD390;
 }
 
 @theme inline {
@@ -72,4 +72,80 @@
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* ===== SMOOTH ANIMATIONS ===== */
+
+/* Page fade-in */
+.page-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal enter animation */
+.modal-enter {
+  animation: modalIn 0.25s ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Cart item slide-in */
+.cart-item-enter {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Loading spinner */
+.spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Smooth hover transitions for all interactive elements */
+button,
+a,
+.card-hover {
+  transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }

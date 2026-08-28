@@ -1,100 +1,114 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { X, UtensilsCrossed } from "lucide-react";
+import Image from "next/image";
+import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
-import { formatPrice } from "@/lib/types";
-import { Button } from "@/components/ui/button";
 
-export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [mounted, setMounted] = useState(false);
-  const { items, removeItem, setQuantity, totalCents } = useCartStore();
+interface CartDrawerProps {
+  open: boolean;
+  onClose: () => void;
+}
 
-  useEffect(() => setMounted(true), []);
-
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+export function CartDrawer({ open, onClose }: CartDrawerProps) {
+  const { items, removeItem, updateQuantity, totalPrice, totalItems } = useCartStore();
 
   if (!open) return null;
 
+  const subtotal = totalPrice();
+  const itemCount = totalItems();
+
   return (
-    <div className="fixed inset-0 z-[100]">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
 
-      <div className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-background shadow-xl">
-        <div className="flex items-center justify-between border-b px-5 py-4">
-          <h2 className="text-lg font-semibold">Your Cart</h2>
-          <button onClick={onClose} aria-label="Close cart">
-            <X size={20} />
-          </button>
-        </div>
-
-        {!mounted || items.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
-            <UtensilsCrossed size={40} strokeWidth={1.5} />
-            <p>Your cart is empty</p>
+      <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
+        <div className="flex w-screen max-w-md flex-col overflow-hidden rounded-l-3xl bg-[#F3EDD8] shadow-2xl transition-all">
+          
+          <div className="flex items-center justify-between border-b border-[#D4C9B8] bg-[#F3EDD8] px-6 py-4">
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="h-5 w-5 text-[#242222]" />
+              <h2 className="text-lg font-bold text-[#242222]">Your Cart</h2>
+              {itemCount > 0 && (
+                <span className="ml-1 rounded-full bg-[#242222] px-2 py-0.5 text-xs font-bold text-[#BDD390]">
+                  {itemCount}
+                </span>
+              )}
+            </div>
+            <button onClick={onClose} className="rounded-full p-1.5 text-[#242222] hover:bg-[#BDD390] hover:text-[#242222] transition">
+              <X className="h-5 w-5" />
+            </button>
           </div>
-        ) : (
-          <>
-            <div className="flex-1 overflow-y-auto px-5 py-4">
-              <div className="flex flex-col divide-y">
+
+          <div className="flex-1 overflow-y-auto p-4">
+            {items.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center text-center">
+                <div className="mb-4 text-[#D4C9B8]">
+                  <ShoppingBag className="mx-auto h-16 w-16 stroke-[1]" />
+                </div>
+                <p className="text-base font-semibold text-[#242222]">Your cart is empty</p>
+                <button onClick={onClose} className="mt-4 rounded-xl bg-[#BDD390] px-6 py-2 text-sm font-bold text-[#242222] transition hover:bg-[#A9C07A]">
+                  Start Shopping
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
                 {items.map((item) => (
-                  <div key={item.productId} className="flex items-center gap-3 py-4">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">{formatPrice(item.priceCents)} each</p>
-                      <div className="mt-2 flex items-center rounded-md border w-fit">
-                        <button
-                          className="px-2 py-1 text-sm"
-                          onClick={() => setQuantity(item.productId, Math.max(1, item.quantity - 1))}
-                        >
-                          −
-                        </button>
-                        <span className="w-6 text-center text-xs">{item.quantity}</span>
-                        <button
-                          className="px-2 py-1 text-sm"
-                          onClick={() => setQuantity(item.productId, item.quantity + 1)}
-                        >
-                          +
+                  <div key={item.id} className="flex items-center gap-3 rounded-xl border border-[#D4C9B8] bg-[#F3EDD8] p-3 transition hover:border-[#242222]">
+                    <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-[#D4C9B8] bg-[#F3EDD8]">
+                      {item.image ? (
+                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-[#E8E3CC] text-xs text-[#242222]/50">No img</div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-1 flex-col">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="text-sm font-semibold text-[#242222] line-clamp-2">{item.name}</h3>
+                        <button onClick={() => removeItem(item.id)} className="text-[#242222] hover:text-[#A87A53] transition">
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className="text-sm font-medium">
-                        {formatPrice(item.priceCents * item.quantity)}
-                      </span>
-                      <button
-                        className="text-xs text-destructive hover:underline"
-                        onClick={() => removeItem(item.productId)}
-                      >
-                        Remove
-                      </button>
+
+                      <p className="mt-1 text-sm font-bold text-[#242222]">
+                        Rs. {(item.price * item.quantity).toFixed(2)}
+                      </p>
+
+                      <div className="mt-2 flex items-center gap-2">
+                        <button
+                          onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#D4C9B8] bg-[#F3EDD8] text-[#242222] hover:border-[#242222] hover:text-[#242222] transition"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </button>
+                        <span className="w-6 text-center text-sm font-bold text-[#242222]">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#D4C9B8] bg-[#F3EDD8] text-[#242222] hover:border-[#242222] hover:text-[#242222] transition"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="border-t px-5 py-4">
-              <div className="mb-3 flex items-center justify-between font-semibold">
-                <span>Total</span>
-                <span>{formatPrice(totalCents())}</span>
+          {items.length > 0 && (
+            <div className="border-t border-[#D4C9B8] bg-[#F3EDD8] p-4">
+              <div className="mb-3 flex items-center justify-between text-base font-bold text-[#242222]">
+                <span>Subtotal</span>
+                <span className="text-[#242222]">Rs. {subtotal.toFixed(2)}</span>
               </div>
-              <Button asChild className="w-full" onClick={onClose}>
-                <Link href="/checkout">Proceed to checkout</Link>
-              </Button>
+              <Link href="/checkout" onClick={onClose} className="flex w-full items-center justify-center rounded-xl bg-[#BDD390] py-3 text-sm font-bold text-[#242222] transition hover:bg-[#A9C07A] shadow-sm">
+                Proceed to Checkout
+              </Link>
             </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

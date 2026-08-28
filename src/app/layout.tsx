@@ -4,7 +4,6 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { OrderTypeModal } from "@/components/order-type-modal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jalal Sons",
-  description: "Full-stack e-commerce clone built with Next.js, Prisma, and Auth.js.",
+  title: "Cozy Cup",
+  description: "Coffee • Bakery • Fast Food — crafted fresh daily.",
 };
 
 export default function RootLayout({
@@ -29,9 +28,8 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col page-transition">
         <Providers>
-          <OrderTypeModal />
           <Header />
           <div className="flex-1">{children}</div>
           <Footer />

@@ -1,32 +1,47 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type SelectedBranch = {
+interface Branch {
   id: string;
   name: string;
   city: string;
   area: string;
-};
+  address: string;
+  orderType?: "delivery" | "pickup";
+}
 
-export type FulfillmentType = "DELIVERY" | "PICKUP";
-
-type BranchState = {
-  branch: SelectedBranch | null;
-  fulfillmentType: FulfillmentType;
-  setBranch: (branch: SelectedBranch) => void;
-  setFulfillmentType: (type: FulfillmentType) => void;
+interface BranchStore {
+  branch: Branch | null;
+  setBranch: (branch: Branch) => void;
+  setOrderType: (orderType: "delivery" | "pickup") => void;
   clearBranch: () => void;
-};
+}
 
-export const useBranchStore = create<BranchState>()(
+export const useBranchStore = create<BranchStore>()(
   persist(
-    (set) => ({
-      branch: null,
-      fulfillmentType: "DELIVERY",
-      setBranch: (branch) => set({ branch }),
-      setFulfillmentType: (fulfillmentType) => set({ fulfillmentType }),
+    (set, get) => ({
+      branch: {
+        id: "default",
+        name: "Select Location",
+        city: "",
+        area: "",
+        address: "",
+        orderType: "pickup",
+      },
+      setBranch: (branch) => {
+        console.log("Setting branch:", branch);
+        set({ branch });
+      },
+      setOrderType: (orderType) => {
+        const currentBranch = get().branch;
+        if (currentBranch) {
+          set({ branch: { ...currentBranch, orderType } });
+        }
+      },
       clearBranch: () => set({ branch: null }),
     }),
-    { name: "jalal-sons-branch" }
+    {
+      name: "branch-storage",
+    }
   )
 );
