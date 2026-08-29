@@ -13,7 +13,6 @@ import { Logo } from "@/components/logo";
 import { mockCategories } from "@/lib/mock-data";
 import type { CategoryNode } from "@/lib/types";
 
-// Generate popular searches from subcategories
 const getPopularSearches = () => {
   const searches: string[] = [];
   mockCategories.forEach((category) => {
@@ -23,16 +22,15 @@ const getPopularSearches = () => {
       });
     }
   });
-  // Add some main categories too
   mockCategories.forEach((category) => {
     searches.push(category.name);
   });
-  // Remove duplicates and limit
   return [...new Set(searches)].slice(0, 12);
 };
 
 export function Header() {
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -48,6 +46,15 @@ export function Header() {
 
   useEffect(() => {
     setMounted(true);
+    const checkScreen = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
+  useEffect(() => {
     const hardcodedCategories: CategoryNode[] = [
       { id: "1", name: "Bakery", slug: "bakery", icon: "🍞", children: [] },
       { id: "2", name: "Dairy", slug: "dairy", icon: "🥛", children: [] },
@@ -75,7 +82,13 @@ export function Header() {
 
   return (
     <>
-      <header className="w-full bg-[#3D2E24] font-sans text-[#F4F6F0] border-b border-[#98AB81]/20 shadow-md">
+      <header 
+        className="w-full bg-[#3D2E24] font-sans text-[#F4F6F0] border-b border-[#98AB81]/20 shadow-md z-50"
+        style={{
+          position: isMobile ? "relative" : "sticky",
+          top: isMobile ? "auto" : "0"
+        }}
+      >
         <div className="mx-auto max-w-7xl px-3 py-2 sm:px-4 sm:py-3 overflow-visible">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
             <button
