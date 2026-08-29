@@ -36,7 +36,6 @@ export default function CheckoutPage() {
 
   const { items, clear } = useCartStore();
   const { branch, fulfillmentType } = useBranchStore();
-
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -44,7 +43,6 @@ export default function CheckoutPage() {
   const [city, setCity] = useState("");
   const [area, setArea] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
-  const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "CARD_DELIVERY" | "ONLINE">("COD");
 
   // Verification Code Modal States
@@ -71,6 +69,7 @@ export default function CheckoutPage() {
   const [selectedHours, setSelectedHours] = useState("12");
   const [selectedMinutes, setSelectedMinutes] = useState("50");
   const [ampm, setAmpm] = useState<"AM" | "PM">("PM");
+  const [notes, setNotes] = useState("");
 
   const deliveryFeeCents = fulfillmentType === "DELIVERY" ? 15000 : 0;
 
@@ -117,6 +116,34 @@ export default function CheckoutPage() {
       </main>
     );
   }
+
+  // Safe Price Calculation Helpers
+  const getItemPrice = (item: any) => {
+    const raw = item.priceCents !== undefined && item.priceCents !== null 
+      ? item.priceCents 
+      : (item.price !== undefined && item.price !== null ? item.price : 0);
+    
+    if (typeof raw === "string") {
+      const parsed = parseFloat(raw.replace(/[^0-9.]/g, ""));
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    return Number(raw) || 0;
+  };
+
+  // Format price in rupees with PKR prefix
+  const formatPriceRupees = (amount: number) => {
+    return `PKR ${amount.toFixed(2)}`;
+  };
+
+  const calculatedTotal = items.reduce((acc, item) => {
+    const price = getItemPrice(item);
+    const qty = Number(item.quantity) || 1;
+    return acc + price * qty;
+  }, 0);
+
+  // deliveryFeeCents is already in cents, convert to rupees for display
+  const deliveryFeeRupees = deliveryFeeCents / 100;
+  const grandTotal = calculatedTotal + deliveryFeeRupees;
 
   const prevMonth = () => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
   const nextMonth = () => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
@@ -173,17 +200,12 @@ export default function CheckoutPage() {
           deliveryTime,
           paymentMethod,
           notes,
-          items: items.map((i) => {
-            const parsedPrice = typeof i.priceCents === "string"
-              ? parseFloat(i.priceCents.replace(/[^0-9.]/g, ""))
-              : Number(i.priceCents) || 0;
-            return {
-              productId: i.productId,
-              name: i.name,
-              quantity: i.quantity,
-              unitPriceCents: parsedPrice,
-            };
-          }),
+          items: items.map((i) => ({
+            productId: i.productId,
+            name: i.name,
+            quantity: i.quantity || 1,
+            unitPriceCents: Math.round(getItemPrice(i) * 100), // Convert to cents for API
+          })),
         }),
       });
 
@@ -214,16 +236,6 @@ export default function CheckoutPage() {
       setSubmitting(false);
     }
   }
-
-  // Safe calculation for Subtotal
-  const calculatedTotal = items.reduce((acc, item) => {
-    const rawPrice = typeof item.priceCents === "string"
-      ? parseFloat(item.priceCents.replace(/[^0-9.]/g, ""))
-      : Number(item.priceCents) || 0;
-    return acc + rawPrice * (Number(item.quantity) || 1);
-  }, 0);
-
-  const grandTotalCents = calculatedTotal + deliveryFeeCents;
 
   return (
     <main className="min-h-screen bg-[#F4F6F0] py-8 px-4 sm:px-6 lg:px-8 text-[#3D2E24]">
@@ -430,13 +442,10 @@ export default function CheckoutPage() {
 
                 <div className="max-h-[380px] overflow-y-auto px-6 py-4 space-y-4">
                   {items.map((item) => {
-                    const imageSrc = (item as unknown as { image?: string }).image || item.imageUrl || "";
-                    
-                    const rawPrice = typeof item.priceCents === "string"
-                      ? parseFloat(item.priceCents.replace(/[^0-9.]/g, ""))
-                      : Number(item.priceCents) || 0;
-                    
-                    const itemTotal = rawPrice * (Number(item.quantity) || 1);
+                    const imageSrc = item.image || item.imageUrl || "";
+                    const price = getItemPrice(item);
+                    const quantity = Number(item.quantity) || 1;
+                    const itemTotal = price * quantity;
 
                     return (
                       <div key={item.productId} className="flex gap-3 border-b border-[#98AB81]/20 pb-4 last:border-none hover:bg-[#F4F6F0]/50 p-2 rounded-xl transition-all">
@@ -459,9 +468,9 @@ export default function CheckoutPage() {
                           <h4 className="text-xs font-bold text-[#3D2E24] line-clamp-1">{item.name}</h4>
                           <div className="flex items-center justify-between mt-2">
                             <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-md border border-dashed border-[#98AB81] bg-[#98AB81]/10 px-1.5 text-[11px] font-semibold text-[#3D2E24]">
-                              {item.quantity}
+                              {quantity}
                             </span>
-                            <span className="text-xs font-bold text-[#3D2E24]">{formatPrice(itemTotal)}</span>
+                            <span className="text-xs font-bold text-[#3D2E24]">{formatPriceRupees(itemTotal)}</span>
                           </div>
                         </div>
                       </div>
@@ -473,17 +482,17 @@ export default function CheckoutPage() {
                   <div className="space-y-2 text-xs text-[#3D2E24]/70">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span className="font-medium text-[#3D2E24]">{formatPrice(calculatedTotal)}</span>
+                      <span className="font-medium text-[#3D2E24]">{formatPriceRupees(calculatedTotal)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Delivery Charges</span>
-                      <span className="font-medium text-[#3D2E24]">{formatPrice(deliveryFeeCents)}</span>
+                      <span className="font-medium text-[#3D2E24]">{formatPriceRupees(deliveryFeeRupees)}</span>
                     </div>
                   </div>
 
                   <div className="mt-4 flex items-center justify-between border-t border-[#98AB81]/30 pt-3 text-sm font-bold text-[#3D2E24]">
                     <span>Grand total</span>
-                    <span className="text-base text-[#3D2E24]">{formatPrice(grandTotalCents)}</span>
+                    <span className="text-base text-[#3D2E24]">{formatPriceRupees(grandTotal)}</span>
                   </div>
 
                   <Button
@@ -681,95 +690,113 @@ export default function CheckoutPage() {
 
                   <div className="flex items-center gap-1.5 bg-black/15 px-3 py-2 rounded-xl border border-white/30 shadow-inner">
                     <input
-                      type="number"
-                      min="1"
-                      max="12"
+                      type="text"
+                      maxLength={2}
                       value={selectedHours}
                       onChange={(e) => setSelectedHours(e.target.value)}
-                      className="w-7 bg-transparent text-center text-xl font-bold text-white outline-none border-b border-white/50 focus:border-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-7 bg-transparent text-center text-lg font-bold text-white outline-none"
                     />
-                    <span className="text-xl font-bold text-white/90">:</span>
+                    <span className="text-lg font-bold text-white/80">:</span>
                     <input
-                      type="number"
-                      min="0"
-                      max="59"
+                      type="text"
+                      maxLength={2}
                       value={selectedMinutes}
                       onChange={(e) => setSelectedMinutes(e.target.value)}
-                      className="w-7 bg-transparent text-center text-xl font-bold text-white outline-none border-b border-white/50 focus:border-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-7 bg-transparent text-center text-lg font-bold text-white outline-none"
                     />
-
-                    <button
-                      type="button"
-                      onClick={() => setAmpm(ampm === "AM" ? "PM" : "AM")}
-                      className="ml-1 text-xs font-bold bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded-md transition-colors"
-                    >
-                      {ampm}
-                    </button>
+                    <div className="flex flex-col text-[10px] font-bold ml-1">
+                      <button
+                        type="button"
+                        onClick={() => setAmpm("AM")}
+                        className={`hover:opacity-100 ${ampm === "AM" ? "text-white underline" : "text-white/60"}`}
+                      >
+                        AM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAmpm("PM")}
+                        className={`hover:opacity-100 ${ampm === "PM" ? "text-white underline" : "text-white/60"}`}
+                      >
+                        PM
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4">
-                <div className="flex items-center justify-between px-2 pb-3 text-xs font-bold text-[#3D2E24]">
-                  <span>{viewDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
-                  <div className="flex gap-3">
-                    <button type="button" onClick={prevMonth} className="p-1 hover:bg-[#F4F6F0] rounded-full transition-colors">
-                      <ChevronLeft className="h-4 w-4 text-[#3D2E24]" />
+              {/* Calendar Control */}
+              <div className="p-4 bg-white">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-[#3D2E24]">
+                    {viewDate.toLocaleString("default", { month: "long" })} {viewDate.getFullYear()}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={prevMonth}
+                      className="p-1 rounded-lg hover:bg-gray-100 text-[#3D2E24]"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
                     </button>
-                    <button type="button" onClick={nextMonth} className="p-1 hover:bg-[#F4F6F0] rounded-full transition-colors">
-                      <ChevronRight className="h-4 w-4 text-[#3D2E24]" />
+                    <button
+                      type="button"
+                      onClick={nextMonth}
+                      className="p-1 rounded-lg hover:bg-gray-100 text-[#3D2E24]"
+                    >
+                      <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-7 text-center text-[11px] font-bold text-gray-400 mb-2">
-                  <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+                <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-gray-400 mb-1">
+                  <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
                 </div>
 
-                <div className="grid grid-cols-7 gap-y-1 text-center text-xs">
-                  {Array.from({ length: firstDayOfWeek }).map((_, idx) => (
-                    <div key={`empty-${idx}`} />
+                <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                  {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+                    <div key={`empty-${i}`} />
                   ))}
-
-                  {Array.from({ length: daysInMonthCount }, (_, i) => i + 1).map((day) => {
+                  {Array.from({ length: daysInMonthCount }).map((_, i) => {
+                    const dayNum = i + 1;
                     const isSelected =
-                      selectedDate.getDate() === day &&
+                      selectedDate.getDate() === dayNum &&
                       selectedDate.getMonth() === viewDate.getMonth() &&
                       selectedDate.getFullYear() === viewDate.getFullYear();
 
                     return (
                       <button
-                        key={day}
+                        key={dayNum}
                         type="button"
-                        onClick={() => setSelectedDate(new Date(viewDate.getFullYear(), viewDate.getMonth(), day))}
-                        className={`h-8 w-8 rounded-full mx-auto flex items-center justify-center transition-all ${
+                        onClick={() => setSelectedDate(new Date(viewDate.getFullYear(), viewDate.getMonth(), dayNum))}
+                        className={`h-8 w-8 mx-auto flex items-center justify-center rounded-full font-semibold transition-all ${
                           isSelected
-                            ? "bg-[#98AB81] font-bold text-white shadow-md scale-105"
-                            : "text-[#3D2E24] hover:bg-[#F4F6F0]"
+                            ? "bg-[#98AB81] text-white shadow-sm"
+                            : "hover:bg-[#F4F6F0] text-[#3D2E24]"
                         }`}
                       >
-                        {day}
+                        {dayNum}
                       </button>
                     );
                   })}
                 </div>
-              </div>
 
-              <div className="flex items-center justify-end gap-4 border-t border-[#98AB81]/20 p-4">
-                <button
-                  type="button"
-                  onClick={() => setIsPickerOpen(false)}
-                  className="text-xs font-bold text-[#3D2E24]/70 hover:text-[#3D2E24] transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmDateTime}
-                  className="text-xs font-bold text-[#98AB81] hover:text-[#83966c] transition-colors"
-                >
-                  OK
-                </button>
+                <div className="mt-5 flex items-center justify-end gap-2 border-t pt-3">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsPickerOpen(false)}
+                    className="text-xs text-gray-500 hover:text-gray-700"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleConfirmDateTime}
+                    className="bg-[#98AB81] text-white hover:bg-[#83966c] text-xs font-bold px-4 py-2 rounded-xl"
+                  >
+                    OK
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

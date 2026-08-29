@@ -15,8 +15,15 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
 
   if (!open) return null;
 
-  const subtotal = totalPrice();
-  const itemCount = totalItems();
+  // Fallback calculations in case store's totalPrice method returns 0 or undefined
+  const calculatedSubtotal = items.reduce((total, item: any) => {
+    const itemPrice = item.price ?? (item.priceCents ? item.priceCents / 100 : 0);
+    const itemQty = item.quantity ?? 1;
+    return total + (itemPrice * itemQty);
+  }, 0);
+
+  const subtotal = typeof totalPrice === "function" ? (totalPrice() || calculatedSubtotal) : calculatedSubtotal;
+  const itemCount = typeof totalItems === "function" ? totalItems() : items.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -53,46 +60,51 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
               </div>
             ) : (
               <div className="space-y-3">
-                {items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 rounded-xl border border-[#D4C9B8] bg-[#F3EDD8] p-3 transition hover:border-[#242222]">
-                    <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-[#D4C9B8] bg-[#F3EDD8]">
-                      {item.image ? (
-                        <Image src={item.image} alt={item.name} fill className="object-cover" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-[#E8E3CC] text-xs text-[#242222]/50">No img</div>
-                      )}
-                    </div>
+                {items.map((item: any) => {
+                  const unitPrice = item.price ?? (item.priceCents ? item.priceCents / 100 : 0);
+                  const itemTotal = unitPrice * item.quantity;
 
-                    <div className="flex flex-1 flex-col">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-sm font-semibold text-[#242222] line-clamp-2">{item.name}</h3>
-                        <button onClick={() => removeItem(item.id)} className="text-[#242222] hover:text-[#A87A53] transition">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                  return (
+                    <div key={item.id} className="flex items-center gap-3 rounded-xl border border-[#D4C9B8] bg-[#F3EDD8] p-3 transition hover:border-[#242222]">
+                      <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-[#D4C9B8] bg-[#F3EDD8]">
+                        {item.image || item.imageUrl ? (
+                          <Image src={item.image || item.imageUrl} alt={item.name} fill className="object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-[#E8E3CC] text-xs text-[#242222]/50">No img</div>
+                        )}
                       </div>
 
-                      <p className="mt-1 text-sm font-bold text-[#242222]">
-                        Rs. {(item.price * item.quantity).toFixed(2)}
-                      </p>
+                      <div className="flex flex-1 flex-col">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-sm font-semibold text-[#242222] line-clamp-2">{item.name}</h3>
+                          <button onClick={() => removeItem(item.id)} className="text-[#242222] hover:text-[#A87A53] transition">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
 
-                      <div className="mt-2 flex items-center gap-2">
-                        <button
-                          onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#D4C9B8] bg-[#F3EDD8] text-[#242222] hover:border-[#242222] hover:text-[#242222] transition"
-                        >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="w-6 text-center text-sm font-bold text-[#242222]">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#D4C9B8] bg-[#F3EDD8] text-[#242222] hover:border-[#242222] hover:text-[#242222] transition"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </button>
+                        <p className="mt-1 text-sm font-bold text-[#242222]">
+                          Rs. {itemTotal.toFixed(2)}
+                        </p>
+
+                        <div className="mt-2 flex items-center gap-2">
+                          <button
+                            onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#D4C9B8] bg-[#F3EDD8] text-[#242222] hover:border-[#242222] hover:text-[#242222] transition"
+                          >
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <span className="w-6 text-center text-sm font-bold text-[#242222]">{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#D4C9B8] bg-[#F3EDD8] text-[#242222] hover:border-[#242222] hover:text-[#242222] transition"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

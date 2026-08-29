@@ -26,6 +26,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
       productId: product.id,
       name: product.name,
       price: priceInRupees,
+      priceCents: effectivePrice,
       image: product.imageUrl || "",
     });
   };

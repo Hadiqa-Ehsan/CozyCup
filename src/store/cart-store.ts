@@ -40,7 +40,7 @@ export const useCartStore = create<CartStore>()(
         const targetId = product.id || product.productId;
         if (!targetId) return;
 
-        const existingItem = items.find((item) => item.productId === targetId);
+        const existingItem = items.find((item) => item.productId === targetId || item.id === targetId);
 
         // Calculate price in rupees from either price or priceCents
         const rawPrice = product.price ?? (product.priceCents ? product.priceCents / 100 : 0);
@@ -48,8 +48,8 @@ export const useCartStore = create<CartStore>()(
 
         if (existingItem) {
           const updatedItems = items.map((item) =>
-            item.productId === targetId
-              ? { ...item, quantity: item.quantity + 1 }
+            item.productId === targetId || item.id === targetId
+              ? { ...item, quantity: item.quantity + 1, price: rawPrice > 0 ? rawPrice : item.price }
               : item
           );
           set({ items: updatedItems });
@@ -67,7 +67,7 @@ export const useCartStore = create<CartStore>()(
       },
 
       removeItem: (id) => {
-        set({ items: get().items.filter((item) => item.id !== id) });
+        set({ items: get().items.filter((item) => item.id !== id && item.productId !== id) });
       },
 
       updateQuantity: (id, quantity) => {
@@ -77,7 +77,7 @@ export const useCartStore = create<CartStore>()(
         }
         set({
           items: get().items.map((item) =>
-            item.id === id ? { ...item, quantity } : item
+            item.id === id || item.productId === id ? { ...item, quantity } : item
           ),
         });
       },
@@ -90,7 +90,7 @@ export const useCartStore = create<CartStore>()(
 
       totalPrice: () => {
         return get().items.reduce((total, item) => {
-          return total + (item.price || 0) * item.quantity;
+          return total + (Number(item.price) || 0) * item.quantity;
         }, 0);
       },
     }),
