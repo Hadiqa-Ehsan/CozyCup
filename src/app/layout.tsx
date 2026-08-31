@@ -27,7 +27,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="flex min-h-screen flex-col page-transition">
+      <body className="flex min-h-screen flex-col">
         <Providers>
           <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
         </Providers>

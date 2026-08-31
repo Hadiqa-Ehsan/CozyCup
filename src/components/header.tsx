@@ -80,14 +80,15 @@ export function Header() {
   const displayLabel = branch?.name || "Select Location";
   const orderTypeLabel = branch?.orderType === "delivery" ? "Delivery from" : "Pick-Up from";
 
+  // Determine if header should be sticky
+  const isSticky = !isMobile;
+
   return (
     <>
       <header 
-        className="w-full bg-[#3D2E24] font-sans text-[#F4F6F0] border-b border-[#98AB81]/20 shadow-md z-50"
-        style={{
-          position: isMobile ? "relative" : "sticky",
-          top: isMobile ? "auto" : "0"
-        }}
+        className={`w-full bg-[#3D2E24] font-sans text-[#F4F6F0] border-b border-[#98AB81]/20 shadow-md z-50 ${
+          isSticky ? 'sticky top-0' : 'relative'
+        }`}
       >
         <div className="mx-auto max-w-7xl px-3 py-2 sm:px-4 sm:py-3 overflow-visible">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
@@ -311,14 +312,23 @@ export function Header() {
               </button>
 
               <div className="hidden md:flex items-center gap-4 text-[#F4F6F0]/80 font-medium text-sm">
-                <span className="flex items-center gap-1.5">
+                <a 
+                  href="tel:+923004805000" 
+                  className="flex items-center gap-1.5 text-[#F4F6F0]/80 hover:text-[#98AB81] transition-colors"
+                >
                   <Phone className="h-3.5 w-3.5 text-[#98AB81]" />
-                  +923004805000
-                </span>
-                <span className="flex items-center gap-1.5">
+                  <span>+923004805000</span>
+                </a>
+                
+                <a 
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=Info@CozyCup.com.pk&su=Inquiry%20from%20Website&body=Hello%20Cozy%20Cup%20Team," 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-[#F4F6F0]/80 hover:text-[#98AB81] transition-colors"
+                >
                   <Mail className="h-3.5 w-3.5 text-[#98AB81]" />
-                  Info@CozyCup.com.pk
-                </span>
+                  <span>Info@CozyCup.com.pk</span>
+                </a>
               </div>
             </div>
             <div className="text-[10px] font-medium text-[#F4F6F0]/80 sm:text-sm">Welcome to Cozy Cup</div>

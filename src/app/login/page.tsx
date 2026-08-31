@@ -27,6 +27,7 @@ export default function LoginPage() {
 function LoginForm() {
   const [step, setStep] = useState<"email" | "password">("email");
   const [serverError, setServerError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [showRegisterMessage, setShowRegisterMessage] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -72,7 +73,8 @@ function LoginForm() {
         setServerError("Invalid email or password.");
       }
     } else {
-      router.push(next);
+      setSuccess(true);
+      setTimeout(() => router.push(next), 1500);
     }
   }
 
@@ -114,6 +116,12 @@ function LoginForm() {
           </h1>
 
           {/* Alert Messages */}
+          {success && (
+            <div className="mb-4 rounded-xl border border-green-600 bg-green-50 p-3 text-center text-xs font-semibold text-green-700">
+              Login successful! Redirecting...
+            </div>
+          )}
+
           {showRegisterMessage && (
             <div className="mb-4 rounded-xl border border-[#3D2E24]/20 bg-[#3D2E24]/10 p-3 text-center text-xs font-semibold text-[#3D2E24]">
               Account not found. Please{" "}
@@ -205,7 +213,7 @@ function LoginForm() {
             ) : (
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || success}
                 className="mt-2 w-full rounded-2xl bg-[#98AB81] py-3.5 text-sm font-bold text-[#3D2E24] shadow-md transition hover:bg-[#869970] active:scale-[0.99] disabled:opacity-50"
               >
                 {isSubmitting ? "Signing in..." : "Login"}

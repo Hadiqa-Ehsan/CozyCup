@@ -65,10 +65,9 @@ export default function RegisterPage() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      {/* Outer Wrapper - Overflow Visible to Let Neon Glow Out */}
       <div className="relative w-full max-w-[460px] p-[4px]">
         
-        {/* 1. Bright Inner Rotating Neon Line */}
+        {/* Rotating Neon Border */}
         <div className="absolute -inset-1 rounded-3xl overflow-hidden pointer-events-none">
           <div
             className="absolute -inset-[150%] animate-spin bg-[conic-gradient(from_0deg,#BDD390,#A87A53,#BDD390,#3D2E24,#BDD390)] opacity-100"
@@ -76,7 +75,7 @@ export default function RegisterPage() {
           />
         </div>
 
-        {/* 2. Soft Outer Glowing Aura */}
+        {/* Glowing Aura */}
         <div className="absolute -inset-2 rounded-3xl overflow-hidden pointer-events-none blur-md">
           <div
             className="absolute -inset-[150%] animate-spin bg-[conic-gradient(from_0deg,#BDD390,#A87A53,#BDD390,#3D2E24,#BDD390)] opacity-80"
@@ -84,10 +83,10 @@ export default function RegisterPage() {
           />
         </div>
 
-        {/* Inner Card Container */}
+        {/* Card Container */}
         <div className="relative w-full rounded-[22px] bg-[#F6F4EB] p-7 shadow-2xl">
           
-          {/* Floating Close Button */}
+          {/* Close Button */}
           <button
             onClick={() => router.back()}
             className="absolute right-4 top-4 rounded-full bg-gray-400/30 p-1.5 text-[#3D2E24] hover:bg-gray-400/50 transition"
@@ -148,9 +147,8 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* Two-Column Row: Gender & Date Of Birth */}
+            {/* Gender & DOB */}
             <div className="grid grid-cols-2 gap-3">
-              {/* Gender */}
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-[#3D2E24]">
                   Gender <span className="font-normal text-gray-500">(Optional)</span>
@@ -171,7 +169,6 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Date of Birth */}
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-[#3D2E24]">
                   Date Of Birth <span className="font-normal text-gray-500">(Optional)</span>
@@ -206,7 +203,35 @@ export default function RegisterPage() {
               {errors.mobile && (
                 <p className="text-[11px] text-red-500">{errors.mobile.message}</p>
               )}
-              <p className="text-[10px] text-gray-400 pt-0.5">Example: +92 3XX-XXXXXXX</p>
+            </div>
+
+            {/* Passwords */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#3D2E24]">Password</label>
+                <input
+                  type="password"
+                  placeholder="At least 8 chars"
+                  className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-xs text-[#3D2E24] outline-none transition focus:border-[#98AB81] focus:ring-2 focus:ring-[#98AB81]/30 placeholder:text-gray-400"
+                  {...register("password")}
+                />
+                {errors.password && (
+                  <p className="text-[11px] text-red-500">{errors.password.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#3D2E24]">Confirm</label>
+                <input
+                  type="password"
+                  placeholder="Re-enter password"
+                  className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-xs text-[#3D2E24] outline-none transition focus:border-[#98AB81] focus:ring-2 focus:ring-[#98AB81]/30 placeholder:text-gray-400"
+                  {...register("confirmPassword")}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-[11px] text-red-500">{errors.confirmPassword.message}</p>
+                )}
+              </div>
             </div>
 
             {/* Submit Button */}

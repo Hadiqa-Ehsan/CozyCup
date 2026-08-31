@@ -32,6 +32,8 @@ model User {
   name          String?
   email         String    @unique
   phone         String?
+  gender        String?   // Added to capture registration form gender field
+  dob           String?   // Added to capture registration form date of birth field
   emailVerified DateTime?
   image         String?
   passwordHash  String? // set when using email/password credentials
@@ -93,23 +95,23 @@ model Category {
 }
 
 model Product {
-  id            String      @id @default(cuid())
-  name          String
-  slug          String      @unique
-  description   String      @db.Text
-  unit          String? // e.g. "1L", "500g", "1 Piece"
-  priceCents    Int // store money as integer cents/paisa, never float
+  id             String      @id @default(cuid())
+  name           String
+  slug           String      @unique
+  description    String      @db.Text
+  unit           String? // e.g. "1L", "500g", "1 Piece"
+  priceCents     Int // store money as integer cents/paisa, never float
   dealPriceCents Int? // set when the product is on a deal/discount
-  currency      String      @default("PKR")
-  imageUrl      String?
-  stock         Int         @default(0)
-  isFeatured    Boolean     @default(false)
-  isDeal        Boolean     @default(false)
-  categoryId    String?
-  category      Category?   @relation(fields: [categoryId], references: [id])
-  orderItems    OrderItem[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  currency       String      @default("PKR")
+  imageUrl       String?
+  stock          Int         @default(0)
+  isFeatured     Boolean     @default(false)
+  isDeal         Boolean     @default(false)
+  categoryId     String?
+  category       Category?   @relation(fields: [categoryId], references: [id])
+  orderItems     OrderItem[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   @@index([categoryId])
 }
