@@ -6,7 +6,6 @@ import {
   TrendingUp,
   Package,
   ArrowUp,
-  ArrowDown,
   Search,
   Bell
 } from "lucide-react";
@@ -18,168 +17,142 @@ const stats = [
   { title: "Total Users", value: "0", change: "+0%", icon: Users, trend: "up" },
 ];
 
-// Mock data for Recent Orders
 const recentOrders = [
   { id: "#2841", customer: "Alice Khan", date: "Just now", items: 2, total: "PKR 1,598.00", status: "Pending" },
   { id: "#2840", customer: "Bilal Ahmed", date: "15 min ago", items: 1, total: "PKR 498.00", status: "Processing" },
-  { id: "#2839", customer: "Sara Zafar", date: "1 hour ago", items: 4, total: "PKR 2,894.00", status: "Shipped" },
 ];
 
-// Mock data for Favorite Products
 const favoriteProducts = [
   { name: "Fresh Milk", category: "Dairy", orders: 45 },
   { name: "Chicken Burger", category: "Fast Food", orders: 38 },
-  { name: "Chocolate Cake", category: "Bakery", orders: 29 },
 ];
 
 export default function AdminDashboard() {
   return (
-    <div className="space-y-8">
-      {/* Header Section (Mocked) */}
-      <header className="flex items-center justify-between rounded-2xl bg-white p-6 shadow-sm border border-[#98AB81]/40">
+    <div className="space-y-6">
+      {/* Top Header Card */}
+      <header className="flex flex-col gap-4 rounded-3xl bg-white p-6 shadow-sm border border-[#98AB81]/30 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#3D2E24]">Good evening, Admin</h1>
+          <h1 className="text-2xl font-bold text-[#3D2E24]">Good evening, Admin.</h1>
           <p className="text-sm text-[#3D2E24]/70">Here's what's happening with your store today.</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#3D2E24]/50" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3D2E24]/40" />
             <input
               type="search"
               placeholder="Search..."
-              className="rounded-xl border border-[#98AB81]/40 bg-[#F4F6F0] py-2 pl-10 pr-4 text-sm focus:border-[#BDD390] focus:ring-1 focus:ring-[#BDD390]"
+              className="rounded-xl border border-[#98AB81]/30 bg-[#F4F6F0] py-2 pl-9 pr-4 text-sm focus:border-[#BDD390] focus:outline-none"
             />
           </div>
-          <button className="rounded-full bg-[#F4F6F0] p-2 text-[#3D2E24]/70 hover:bg-[#98AB81]/20">
-            <Bell className="h-5 w-5" />
+          <button className="rounded-xl bg-[#F4F6F0] p-2.5 text-[#3D2E24]/70 hover:bg-[#98AB81]/20">
+            <Bell className="h-4 w-4" />
           </button>
         </div>
       </header>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Stats Grid Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.title}
-            className="rounded-2xl border border-[#98AB81]/40 bg-white p-6 shadow-sm transition-all hover:border-[#BDD390] hover:shadow-md"
+            className="rounded-3xl bg-white p-6 shadow-sm border border-[#98AB81]/30 transition-all hover:border-[#BDD390]"
           >
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-[#3D2E24]/70">{stat.title}</span>
-              <div className="rounded-full bg-[#98AB81]/20 p-2">
-                <stat.icon className="h-5 w-5 text-[#98AB81]" />
+              <div className="rounded-2xl bg-[#BDD390]/20 p-2.5">
+                <stat.icon className="h-5 w-5 text-[#3D2E24]" />
               </div>
             </div>
-            <p className="mt-2 text-3xl font-bold text-[#3D2E24]">{stat.value}</p>
-            <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold">
-              <span className={stat.trend === "up" ? "text-green-600" : "text-red-600"}>
-                {stat.change}
-              </span>
-              <span className="text-[#3D2E24]/60">from last month</span>
+            <p className="mt-4 text-2xl font-bold text-[#3D2E24]">{stat.value}</p>
+            <div className="mt-2 flex items-center gap-1 text-xs font-semibold text-green-600">
+              <ArrowUp className="h-3 w-3" />
+              <span>{stat.change}</span>
+              <span className="text-[#3D2E24]/50 font-normal">from last month</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Order Progress Tracker (Mocked) */}
-      <div className="rounded-2xl border border-[#98AB81]/40 bg-white p-6 shadow-sm">
-        <div className="flex items-start justify-between">
+      {/* Order Progress Tracker Card */}
+      <div className="rounded-3xl bg-white p-6 shadow-sm border border-[#98AB81]/30">
+        <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-lg font-bold text-[#3D2E24]">Order #{recentOrders[0].id} – {recentOrders[0].items} items</h2>
-            <p className="text-sm text-[#3D2E24]/70">Customer: {recentOrders[0].customer} - Placed at 7:42 PM</p>
+            <h2 className="text-base font-bold text-[#3D2E24]">Order #2841 – Charred Double Smash + 2 items</h2>
+            <p className="text-xs text-[#3D2E24]/70">CozyCup Kitchen • Placed at 7:42 PM</p>
           </div>
-          <button className="rounded-full bg-[#F4F6F0] px-4 py-1 text-xs font-medium text-[#3D2E24]/70 hover:bg-[#98AB81]/20">
-            On the way – ETA 12 min
-          </button>
+          <span className="inline-flex w-fit rounded-full bg-[#BDD390]/30 px-3 py-1 text-xs font-semibold text-[#3D2E24]">
+            On the way • ETA 12 min
+          </span>
         </div>
-        <div className="mt-6 flex items-center justify-between">
+
+        <div className="mt-6 flex items-center justify-between px-2">
           {['Confirmed', 'Cooking', 'On the way', 'Delivered'].map((step, index) => (
             <div key={step} className="flex flex-1 flex-col items-center text-center">
-              <div className={`relative h-3 w-3 rounded-full ${index <= 2 ? 'bg-[#BDD390]' : 'bg-[#98AB81]/30'}`}>
-                {index < 2 && <div className="absolute left-full top-1/2 h-0.5 w-full bg-[#BDD390]" />}
-                {index === 2 && <div className="absolute left-full top-1/2 h-0.5 w-1/2 bg-[#BDD390]" />}
-              </div>
-              <span className={`mt-2 text-xs font-medium ${index <= 2 ? 'text-[#3D2E24]' : 'text-[#3D2E24]/50'}`}>
-                {step}
-              </span>
+              <div className={`h-3 w-3 rounded-full ${index <= 2 ? 'bg-[#3D2E24]' : 'bg-[#98AB81]/30'}`} />
+              <span className="mt-2 text-xs font-medium text-[#3D2E24]">{step}</span>
             </div>
           ))}
         </div>
-        <button className="mt-6 w-full rounded-xl bg-[#3D2E24] py-3 text-center text-sm font-semibold text-white hover:bg-[#5C4A3A]">
+
+        <button className="mt-6 w-full rounded-2xl bg-[#3D2E24] py-3 text-center text-sm font-semibold text-white transition-all hover:bg-[#5C4A3A]">
           Track Order Live
         </button>
       </div>
 
-      {/* Recent Orders & Favorite Dishes */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        {/* Recent Orders Table */}
-        <div className="rounded-2xl border border-[#98AB81]/40 bg-white p-6 shadow-sm lg:col-span-2">
+      {/* Recent Orders & Favorite Dishes Cards Grid */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Recent Orders Table Card */}
+        <div className="rounded-3xl bg-white p-6 shadow-sm border border-[#98AB81]/30 lg:col-span-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-[#3D2E24]">Recent Orders</h2>
-            <button className="text-sm font-medium text-[#98AB81] hover:text-[#BDD390]">View all</button>
+            <h2 className="text-base font-bold text-[#3D2E24]">Recent Orders</h2>
+            <button className="text-xs font-semibold text-[#3D2E24]/60 hover:text-[#3D2E24]">View all</button>
           </div>
-          <div className="mt-4 flow-root">
-            <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-              <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <table className="min-w-full divide-y divide-[#98AB81]/20">
-                  <thead>
-                    <tr>
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-[#3D2E24] sm:pl-0">Order ID</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[#3D2E24]">Customer</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[#3D2E24]">Date</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[#3D2E24]">Total</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-[#3D2E24]">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#98AB81]/20">
-                    {recentOrders.map((order) => (
-                      <tr key={order.id}>
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-[#98AB81] sm:pl-0">{order.id}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-[#3D2E24]">{order.customer}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-[#3D2E24]/70">{order.date}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-[#3D2E24]">{order.total}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm">
-                            <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
-                                order.status === 'Shipped' ? 'bg-green-100 text-green-800' : ''
-                            }`}>
-                                {order.status}
-                            </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full divide-y divide-[#98AB81]/20">
+              <thead>
+                <tr>
+                  <th className="py-3 text-left text-xs font-semibold text-[#3D2E24]/70">Order ID</th>
+                  <th className="py-3 text-left text-xs font-semibold text-[#3D2E24]/70">Customer</th>
+                  <th className="py-3 text-left text-xs font-semibold text-[#3D2E24]/70">Total</th>
+                  <th className="py-3 text-left text-xs font-semibold text-[#3D2E24]/70">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#98AB81]/10">
+                {recentOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td className="py-3 text-xs font-bold text-[#3D2E24]">{order.id}</td>
+                    <td className="py-3 text-xs text-[#3D2E24]/80">{order.customer}</td>
+                    <td className="py-3 text-xs font-semibold text-[#3D2E24]">{order.total}</td>
+                    <td className="py-3 text-xs">
+                      <span className="rounded-full bg-[#BDD390]/30 px-2.5 py-1 font-medium text-[#3D2E24]">
+                        {order.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Favorite Dishes List */}
-        <div className="rounded-2xl border border-[#98AB81]/40 bg-white p-6 shadow-sm">
+        {/* Favorite Dishes Card */}
+        <div className="rounded-3xl bg-white p-6 shadow-sm border border-[#98AB81]/30">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-[#3D2E24]">Favorite Dishes</h2>
-            <button className="text-sm font-medium text-[#98AB81] hover:text-[#BDD390]">See all</button>
+            <h2 className="text-base font-bold text-[#3D2E24]">Favorite Dishes</h2>
+            <button className="text-xs font-semibold text-[#3D2E24]/60 hover:text-[#3D2E24]">See all</button>
           </div>
-          <ul role="list" className="mt-6 divide-y divide-[#98AB81]/20">
+          <div className="mt-4 space-y-4">
             {favoriteProducts.map((product) => (
-              <li key={product.name} className="flex items-center justify-between py-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-[#F4F6F0] border border-[#98AB81]/20 flex items-center justify-center">
-                     <Package className="h-5 w-5 text-[#98AB81]/50"/>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#3D2E24]">{product.name}</p>
-                    <p className="text-xs text-[#3D2E24]/70">{product.category}</p>
-                  </div>
+              <div key={product.name} className="flex items-center justify-between rounded-2xl bg-[#F4F6F0] p-3">
+                <div>
+                  <p className="text-xs font-bold text-[#3D2E24]">{product.name}</p>
+                  <p className="text-[10px] text-[#3D2E24]/60">{product.category}</p>
                 </div>
-                <div className="text-right">
-                    <p className="text-sm font-semibold text-[#98AB81]">{product.orders}</p>
-                    <p className="text-xs text-[#3D2E24]/70">Orders</p>
-                </div>
-              </li>
+                <span className="text-xs font-bold text-[#3D2E24]">{product.orders} orders</span>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
     </div>
