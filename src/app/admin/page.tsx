@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   ShoppingBag,
   Users,
@@ -7,151 +8,168 @@ import {
   Package,
   ArrowUp,
   Search,
-  Bell
+  Bell,
+  Activity,
+  BarChart3
 } from "lucide-react";
 
-const stats = [
-  { title: "Total Revenue", value: "PKR 0.00", change: "+0%", icon: TrendingUp },
-  { title: "Total Orders", value: "0", change: "+0%", icon: ShoppingBag },
-  { title: "Total Products", value: "0", change: "+0%", icon: Package },
-  { title: "Total Users", value: "0", change: "+0%", icon: Users },
-];
-
-const recentOrders = [
-  { id: "#2841", customer: "Alice Khan", total: "PKR 1,598.00", status: "Pending" },
-  { id: "#2840", customer: "Bilal Ahmed", total: "PKR 498.00", status: "Processing" },
-];
-
-const favoriteProducts = [
-  { name: "Fresh Milk", category: "Dairy", orders: 45 },
-  { name: "Chicken Burger", category: "Fast Food", orders: 38 },
-];
-
 export default function AdminDashboard() {
+  // Animation states for counting up numbers on load
+  const [revenue, setRevenue] = useState(0);
+  const [ordersCount, setOrdersCount] = useState(0);
+  const [productsCount, setProductsCount] = useState(0);
+  const [usersCount, setUsersCount] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setRevenue(14250);
+      setOrdersCount(328);
+      setProductsCount(84);
+      setUsersCount(1240);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const stats = [
+    { title: "Total Revenue", value: `PKR ${revenue.toLocaleString()}`, change: "+14.2%", icon: TrendingUp },
+    { title: "Total Orders", value: ordersCount.toLocaleString(), change: "+8.1%", icon: ShoppingBag },
+    { title: "Total Products", value: productsCount.toLocaleString(), change: "+3.4%", icon: Package },
+    { title: "Total Users", value: usersCount.toLocaleString(), change: "+12.5%", icon: Users },
+  ];
+
+  const recentOrders = [
+    { id: "#2841", customer: "Alice Khan", total: "PKR 1,598.00", status: "Pending" },
+    { id: "#2840", customer: "Bilal Ahmed", total: "PKR 498.00", status: "Processing" },
+    { id: "#2839", customer: "Sara Malik", total: "PKR 2,350.00", status: "Delivered" },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white font-sans">
       {/* Top Header */}
-      <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/60 p-6 shadow-sm border border-[#BDD390] sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-4 rounded-3xl bg-[#3D2E24]/40 p-6 backdrop-blur-[12px] border border-white/20 shadow-xl transition-all duration-300 hover:border-[#BDD390] sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black text-[#2D231F]">Good evening, Admin.</h1>
-          <p className="text-sm font-medium text-[#2D231F]/70">Here is what is happening with your store today.</p>
+          <h1 className="text-2xl font-black text-white">Good evening, Admin.</h1>
+          <p className="text-sm font-medium text-[#F4F6F0]/70">Here is what is happening with CozyCup today.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2D231F]/50" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
             <input
               type="search"
-              placeholder="Search..."
-              className="rounded-2xl border border-[#BDD390] bg-white py-2.5 pl-10 pr-4 text-sm font-medium text-[#2D231F] focus:border-[#2D231F] focus:outline-none"
+              placeholder="Search metrics..."
+              className="rounded-2xl border border-white/20 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-medium text-white placeholder-white/40 focus:border-[#BDD390] focus:outline-none backdrop-blur-md"
             />
           </div>
-          <button className="rounded-2xl bg-white p-3 text-[#2D231F] border border-[#BDD390] transition-all hover:bg-[#2D231F] hover:text-white shadow-sm">
+          <button className="relative rounded-2xl bg-white/10 p-3 text-white border border-white/20 transition-all hover:bg-white/20 hover:border-[#BDD390] backdrop-blur-md">
             <Bell className="h-4 w-4" />
+            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[#BDD390] animate-pulse" />
           </button>
         </div>
       </header>
 
-      {/* Stats Cards */}
+      {/* 4 Stats Cards with Glassmorphism & Hover Lift */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.title}
-            className="rounded-3xl bg-[#F3EDD8]/30 p-6 shadow-sm border border-[#BDD390]/70 transition-all hover:border-[#2D231F]"
+            className="group rounded-3xl bg-[rgba(255,255,255,0.15)] p-6 backdrop-blur-[12px] border border-[rgba(255,255,255,0.2)] shadow-xl transition-all duration-300 hover:-translate-y-[6px] hover:shadow-2xl hover:border-[#BDD390]"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#2D231F]/60">{stat.title}</span>
-              <div className="rounded-2xl bg-[#BDD390] p-3 text-[#2D231F] shadow-sm">
+              <span className="text-xs font-bold uppercase tracking-wider text-white/70">{stat.title}</span>
+              <div className="rounded-2xl bg-[#BDD390]/30 p-3 text-[#BDD390] backdrop-blur-md border border-[#BDD390]/30 transition-transform group-hover:scale-110">
                 <stat.icon className="h-5 w-5" />
               </div>
             </div>
-            <p className="mt-4 text-3xl font-black text-[#2D231F]">{stat.value}</p>
-            <div className="mt-2 flex items-center gap-1.5 text-xs font-bold text-emerald-700">
-              <span className="flex items-center rounded-full bg-[#BDD390]/50 px-2.5 py-0.5 text-[#2D231F]">
+            <p className="mt-4 text-3xl font-black text-white">{stat.value}</p>
+            <div className="mt-2 flex items-center gap-1.5 text-xs font-bold text-[#BDD390]">
+              <span className="flex items-center rounded-full bg-[#BDD390]/20 px-2.5 py-0.5 border border-[#BDD390]/30">
                 <ArrowUp className="h-3 w-3 mr-0.5" /> {stat.change}
               </span>
-              <span className="text-[#2D231F]/50 font-normal">from last month</span>
+              <span className="text-white/50 font-normal">from last month</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Live Order Tracker Banner */}
-      <div className="rounded-3xl bg-[#2D231F] p-6 text-white shadow-lg">
-        <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="text-base font-bold text-white">Order #2841 – Charred Double Smash + 2 items</h2>
-            <p className="text-xs text-[#BDD390]">Cozy Cup Kitchen • Placed at 7:42 PM</p>
+      {/* Mini Charts Section (Line & Bar representation) */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-3xl bg-[rgba(255,255,255,0.15)] p-6 backdrop-blur-[12px] border border-[rgba(255,255,255,0.2)] shadow-xl transition-all duration-300 hover:-translate-y-[6px] hover:border-[#BDD390]">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <Activity className="h-4 w-4 text-[#BDD390]" /> Revenue Trend
+            </h2>
+            <span className="text-xs font-bold text-[#BDD390] bg-[#BDD390]/20 px-3 py-1 rounded-full border border-[#BDD390]/30">Live Weekly</span>
           </div>
-          <span className="inline-flex w-fit rounded-full bg-[#BDD390] px-3.5 py-1 text-xs font-extrabold text-[#2D231F]">
-            On the way • ETA 12 min
-          </span>
+          <div className="h-36 flex items-end justify-between gap-3 pt-6 px-2">
+            {[40, 65, 45, 80, 95, 75, 100].map((height, i) => (
+              <div key={i} className="w-full bg-white/10 rounded-2xl overflow-hidden flex flex-col justify-end h-full group">
+                <div 
+                  style={{ height: `${height}%` }} 
+                  className="w-full bg-gradient-to-t from-[#BDD390]/60 to-[#BDD390] rounded-2xl transition-all duration-500 group-hover:brightness-125" 
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-8 flex items-center justify-between px-4">
-          {['Confirmed', 'Cooking', 'On the way', 'Delivered'].map((step, index) => (
-            <div key={step} className="flex flex-1 flex-col items-center text-center">
-              <div className={`h-3.5 w-3.5 rounded-full ${index <= 2 ? 'bg-[#BDD390]' : 'bg-white/30'}`} />
-              <span className={`mt-2 text-xs font-semibold ${index <= 2 ? 'text-white' : 'text-white/50'}`}>{step}</span>
-            </div>
-          ))}
+        <div className="rounded-3xl bg-[rgba(255,255,255,0.15)] p-6 backdrop-blur-[12px] border border-[rgba(255,255,255,0.2)] shadow-xl transition-all duration-300 hover:-translate-y-[6px] hover:border-[#BDD390]">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-[#BDD390]" /> Order Volume
+            </h2>
+            <span className="text-xs font-bold text-[#BDD390] bg-[#BDD390]/20 px-3 py-1 rounded-full border border-[#BDD390]/30">Last 7 Days</span>
+          </div>
+          <div className="h-36 flex items-end justify-between gap-3 pt-6 px-2">
+            {[30, 50, 70, 60, 85, 90, 110].map((val, i) => (
+              <div key={i} className="w-full bg-white/10 rounded-2xl overflow-hidden flex flex-col justify-end h-full group">
+                <div 
+                  style={{ height: `${val}%` }} 
+                  className="w-full bg-gradient-to-t from-white/20 to-white/60 rounded-2xl transition-all duration-500 group-hover:bg-[#BDD390]" 
+                />
+              </div>
+            ))}
+          </div>
         </div>
-
-        <button className="mt-8 w-full rounded-2xl bg-[#BDD390] py-3.5 text-center text-sm font-extrabold text-[#2D231F] transition-all hover:bg-[#a9c07a]">
-          Track Order Live
-        </button>
       </div>
 
-      {/* Tables & Lists Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="rounded-3xl bg-[#F3EDD8]/20 p-6 shadow-sm border border-[#BDD390] lg:col-span-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-[#2D231F]">Recent Orders</h2>
-            <button className="text-xs font-bold text-[#2D231F]/70 hover:text-[#2D231F]">View all</button>
-          </div>
-          <div className="mt-4 overflow-x-auto">
-            <table className="min-w-full divide-y divide-[#BDD390]">
-              <thead>
-                <tr>
-                  <th className="py-3 text-left text-xs font-bold text-[#2D231F]/70 uppercase tracking-wider">Order ID</th>
-                  <th className="py-3 text-left text-xs font-bold text-[#2D231F]/70 uppercase tracking-wider">Customer</th>
-                  <th className="py-3 text-left text-xs font-bold text-[#2D231F]/70 uppercase tracking-wider">Total</th>
-                  <th className="py-3 text-left text-xs font-bold text-[#2D231F]/70 uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#BDD390]/30">
-                {recentOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td className="py-3.5 text-xs font-bold text-[#2D231F]">{order.id}</td>
-                    <td className="py-3.5 text-xs font-medium text-[#2D231F]/90">{order.customer}</td>
-                    <td className="py-3.5 text-xs font-bold text-[#2D231F]">{order.total}</td>
-                    <td className="py-3.5 text-xs">
-                      <span className="rounded-full bg-[#BDD390] px-3 py-1 font-bold text-[#2D231F]">
+      {/* Recent Orders Table */}
+      <div className="rounded-3xl bg-[rgba(255,255,255,0.15)] p-6 backdrop-blur-[12px] border border-[rgba(255,255,255,0.2)] shadow-xl transition-all duration-300 hover:border-[#BDD390]">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-white">Recent Orders</h2>
+          <button className="text-xs font-bold text-[#BDD390] hover:underline">View all orders</button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-white/10">
+            <thead>
+              <tr>
+                <th className="py-3 text-left text-xs font-bold text-white/60 uppercase tracking-wider">Order ID</th>
+                <th className="py-3 text-left text-xs font-bold text-white/60 uppercase tracking-wider">Customer</th>
+                <th className="py-3 text-left text-xs font-bold text-white/60 uppercase tracking-wider">Total</th>
+                <th className="py-3 text-left text-xs font-bold text-white/60 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {recentOrders.map((order) => {
+                const statusColor = 
+                  order.status === "Pending" ? "bg-amber-400/20 text-amber-200 border-amber-400/30 animate-pulse" :
+                  order.status === "Processing" ? "bg-blue-400/20 text-blue-200 border-blue-400/30" :
+                  "bg-emerald-400/20 text-emerald-200 border-emerald-400/30";
+
+                return (
+                  <tr key={order.id} className="transition-colors hover:bg-white/5">
+                    <td className="py-4 text-xs font-bold text-white">{order.id}</td>
+                    <td className="py-4 text-xs font-medium text-white/90">{order.customer}</td>
+                    <td className="py-4 text-xs font-bold text-white">{order.total}</td>
+                    <td className="py-4 text-xs">
+                      <span className={`inline-flex rounded-full px-3 py-1 font-bold border backdrop-blur-sm ${statusColor}`}>
                         {order.status}
                       </span>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="rounded-3xl bg-[#F3EDD8]/20 p-6 shadow-sm border border-[#BDD390]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-[#2D231F]">Favorite Dishes</h2>
-            <button className="text-xs font-bold text-[#2D231F]/70 hover:text-[#2D231F]">See all</button>
-          </div>
-          <div className="mt-4 space-y-3">
-            {favoriteProducts.map((product) => (
-              <div key={product.name} className="flex items-center justify-between rounded-2xl bg-white p-4 border border-[#BDD390]/60 shadow-sm">
-                <div>
-                  <p className="text-xs font-bold text-[#2D231F]">{product.name}</p>
-                  <p className="text-[10px] font-semibold text-[#2D231F]/60">{product.category}</p>
-                </div>
-                <span className="rounded-full bg-[#BDD390]/50 px-2.5 py-1 text-xs font-bold text-[#2D231F]">{product.orders} orders</span>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
