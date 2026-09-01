@@ -3,15 +3,13 @@
 import { useState, useEffect } from "react";
 import {
   ShoppingBag,
-  Users,
   TrendingUp,
-  Package,
-  ArrowUp,
   Search,
   Bell,
-  Activity,
   Sparkles,
-  Crown
+  Crown,
+  BarChart3,
+  LineChart
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -25,6 +23,30 @@ export default function AdminDashboard() {
     }, 200);
     return () => clearTimeout(timer);
   }, []);
+
+  // Weekly data for the proper charts
+  const weeklyRevenueData = [
+    { day: "Mon", amount: 1800 },
+    { day: "Tue", amount: 2400 },
+    { day: "Wed", amount: 1950 },
+    { day: "Thu", amount: 3100 },
+    { day: "Fri", amount: 4200 },
+    { day: "Sat", amount: 5600 },
+    { day: "Sun", amount: 4800 },
+  ];
+
+  const orderVolumeData = [
+    { day: "Mon", orders: 24 },
+    { day: "Tue", orders: 35 },
+    { day: "Wed", orders: 28 },
+    { day: "Thu", orders: 42 },
+    { day: "Fri", orders: 58 },
+    { day: "Sat", orders: 75 },
+    { day: "Sun", orders: 62 },
+  ];
+
+  const maxRevenue = 6000;
+  const maxOrders = 80;
 
   return (
     <div className="space-y-8 text-[#3D2E24] font-sans pb-10">
@@ -50,7 +72,7 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      {/* OVERLAPPING FEATURED CARDS SECTION (Inspired by your food card layout reference) */}
+      {/* OVERLAPPING FEATURED CARDS SECTION */}
       <div className="space-y-4">
         <h2 className="text-lg font-black text-[#3D2E24] flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-[#3D2E24]" /> Featured Performance Highlights
@@ -58,7 +80,7 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3 pt-4">
           
-          {/* Card 1: Standard Stat Card */}
+          {/* Card 1 */}
           <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md transition-all hover:-translate-y-2">
             <div className="flex justify-between items-center mb-4">
               <span className="text-xs font-bold uppercase tracking-wider text-[#3D2E24]/60">Monthly Revenue</span>
@@ -70,12 +92,9 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          {/* Card 2: OVERLAPPING POP-OUT CARD (Exact style of the middle food card in your reference) */}
+          {/* Card 2: OVERLAPPING POP-OUT CARD */}
           <div className="relative group">
-            {/* Background green decorative offset card layer */}
             <div className="absolute inset-0 bg-[#BDD390] rounded-[2.5rem] rotate-3 scale-105 shadow-lg opacity-90 transition-transform group-hover:rotate-6" />
-            
-            {/* Main Overlapping Foreground Card */}
             <div className="relative rounded-[2.5rem] bg-white p-6 shadow-xl border-2 border-[#3D2E24]/10 transition-transform hover:-translate-y-2">
               <div className="absolute -top-6 right-8 bg-[#3D2E24] text-[#BDD390] px-4 py-1.5 rounded-full text-xs font-black shadow-md flex items-center gap-1">
                 <Crown className="h-3.5 w-3.5" /> Top Seller
@@ -96,7 +115,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Card 3: Standard Stat Card */}
+          {/* Card 3 */}
           <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md transition-all hover:-translate-y-2">
             <div className="flex justify-between items-center mb-4">
               <span className="text-xs font-bold uppercase tracking-wider text-[#3D2E24]/60">Total Orders</span>
@@ -111,67 +130,77 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ADVANCED UNIQUE CHARTS GRID (Inspired by your Hyper Charts reference) */}
+      {/* PROPER ANALYTICS CHARTS SECTION */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 pt-4">
         
-        {/* Chart 1: Star / Radar Metric Map (Like top-left graph in your reference) */}
+        {/* Chart 1: Weekly Revenue Trend */}
         <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-base font-bold text-[#3D2E24] flex items-center gap-2">
-              <Activity className="h-4 w-4 text-[#3D2E24]" /> Branch Performance Matrix
-            </h2>
-            <span className="text-xs font-bold text-[#3D2E24] bg-[#BDD390] px-3 py-1 rounded-full shadow-sm">Radar View</span>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-base font-bold text-[#3D2E24] flex items-center gap-2">
+                <LineChart className="h-4 w-4 text-[#3D2E24]" /> Weekly Revenue (PKR)
+              </h2>
+              <p className="text-xs text-[#3D2E24]/60 mt-0.5">Earnings across the last 7 days</p>
+            </div>
+            <span className="text-xs font-bold text-[#3D2E24] bg-[#BDD390] px-3 py-1 rounded-full shadow-sm">Live Trend</span>
           </div>
-          <div className="flex flex-col items-center justify-center py-6">
-            <div className="relative w-48 h-48 flex items-center justify-center">
-              {/* Concentric rings */}
-              <div className="absolute w-48 h-48 rounded-full border border-[#3D2E24]/10" />
-              <div className="absolute w-32 h-32 rounded-full border border-[#3D2E24]/15" />
-              <div className="absolute w-16 h-16 rounded-full border border-[#3D2E24]/20" />
-              
-              {/* Star polygon shape via SVG */}
-              <svg className="absolute w-44 h-44 text-[#3D2E24] drop-shadow-md" viewBox="0 0 100 100">
-                <polygon 
-                  points="50,10 65,35 90,40 70,65 75,90 50,75 25,90 30,65 10,40 35,35" 
-                  fill="rgba(189,211,144,0.5)" 
-                  stroke="#3D2E24" 
-                  strokeWidth="2" 
-                />
-                <circle cx="50" cy="50" r="4" fill="#3D2E24" />
-              </svg>
-            </div>
-            <div className="mt-4 flex gap-4 text-xs font-bold text-[#3D2E24]/70">
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#3D2E24]" /> Gulberg</span>
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#BDD390]" /> DHA Phase 5</span>
-            </div>
+
+          <div className="h-48 flex items-end justify-between gap-2 pt-4 px-2 border-b border-[#BDD390]/40 pb-2">
+            {weeklyRevenueData.map((item) => {
+              const heightPercentage = (item.amount / maxRevenue) * 100;
+              return (
+                <div key={item.day} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
+                  <span className="text-[10px] font-bold text-[#3D2E24] opacity-0 group-hover:opacity-100 transition-opacity">
+                    ₨{item.amount}
+                  </span>
+                  <div 
+                    style={{ height: `${heightPercentage}%` }} 
+                    className="w-full bg-[#3D2E24] rounded-t-xl transition-all duration-300 group-hover:bg-[#BDD390]" 
+                  />
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex justify-between px-2 pt-3 text-xs font-bold text-[#3D2E24]/70">
+            {weeklyRevenueData.map((item) => (
+              <span key={item.day}>{item.day}</span>
+            ))}
           </div>
         </div>
 
-        {/* Chart 2: Connected Node Network (Like bottom-left graph in your reference) */}
+        {/* Chart 2: Daily Order Volume Bar Chart */}
         <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-[#3D2E24]">Supply Chain Node Network</h2>
-            <span className="text-xs font-bold text-[#3D2E24] bg-[#BDD390] px-3 py-1 rounded-full shadow-sm">Active Map</span>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-base font-bold text-[#3D2E24] flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-[#3D2E24]" /> Daily Order Volume
+              </h2>
+              <p className="text-xs text-[#3D2E24]/60 mt-0.5">Total completed orders per day</p>
+            </div>
+            <span className="text-xs font-bold text-[#3D2E24] bg-[#BDD390] px-3 py-1 rounded-full shadow-sm">Volume</span>
           </div>
-          <div className="h-48 relative flex items-center justify-center bg-white/40 rounded-2xl border border-[#BDD390]/40 p-4">
-            {/* SVG Connecting lines */}
-            <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-              <line x1="20%" y1="30%" x2="50%" y2="70%" stroke="#3D2E24" strokeWidth="2" strokeDasharray="4" opacity="0.4" />
-              <line x1="50%" y1="70%" x2="80%" y2="30%" stroke="#3D2E24" strokeWidth="2" opacity="0.6" />
-              <line x1="20%" y1="30%" x2="80%" y2="30%" stroke="#BDD390" strokeWidth="3" />
-            </svg>
-            {/* Node points */}
-            <div className="absolute left-[20%] top-[30%] -translate-x-1/2 -translate-y-1/2 bg-[#3D2E24] text-[#BDD390] p-2.5 rounded-2xl shadow-lg text-xs font-bold">
-              Hub A
-            </div>
-            <div className="absolute left-[50%] top-[70%] -translate-x-1/2 -translate-y-1/2 bg-[#BDD390] text-[#3D2E24] p-2.5 rounded-2xl shadow-lg text-xs font-extrabold">
-              Central Node
-            </div>
-            <div className="absolute left-[80%] top-[30%] -translate-x-1/2 -translate-y-1/2 bg-[#3D2E24] text-[#BDD390] p-2.5 rounded-2xl shadow-lg text-xs font-bold">
-              Hub B
-            </div>
+
+          <div className="h-48 flex items-end justify-between gap-3 pt-4 px-2 border-b border-[#BDD390]/40 pb-2">
+            {orderVolumeData.map((item) => {
+              const heightPercentage = (item.orders / maxOrders) * 100;
+              return (
+                <div key={item.day} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
+                  <span className="text-[10px] font-bold text-[#3D2E24] opacity-0 group-hover:opacity-100 transition-opacity">
+                    {item.orders}
+                  </span>
+                  <div 
+                    style={{ height: `${heightPercentage}%` }} 
+                    className="w-full bg-[#BDD390] rounded-t-xl transition-all duration-300 group-hover:bg-[#3D2E24]" 
+                  />
+                </div>
+              );
+            })}
           </div>
-          <p className="text-[11px] text-[#3D2E24]/60 text-center mt-3">All regional inventory links operating at optimal routing capacity.</p>
+          <div className="flex justify-between px-2 pt-3 text-xs font-bold text-[#3D2E24]/70">
+            {orderVolumeData.map((item) => (
+              <span key={item.day}>{item.day}</span>
+            ))}
+          </div>
         </div>
 
       </div>
