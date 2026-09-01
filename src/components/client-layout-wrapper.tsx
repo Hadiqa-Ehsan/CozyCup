@@ -12,12 +12,15 @@ export function ClientLayoutWrapper({ children }: { children: React.ReactNode })
 
   const cleanPath = pathname?.replace(/\/$/, "") || "";
   const isPolicyPage = cleanPath === "/terms" || cleanPath === "/privacy" || cleanPath === "/privacy-policy";
+  const isAdmin = cleanPath.startsWith("/admin");
+
+  const hideHeaderFooter = isPolicyPage || isAdmin;
 
   return (
     <>
-      {!isPolicyPage && <Header />}
+      {!hideHeaderFooter && <Header />}
       <div className="flex-1">{children}</div>
-      {!isPolicyPage && <Footer />}
+      {!hideHeaderFooter && <Footer />}
     </>
   );
 }
