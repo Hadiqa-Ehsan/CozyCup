@@ -94,7 +94,7 @@ prisma/
 4. Vercel auto-detects Next.js and deploys on every push
 5. npm run build
 6. npx --yes vercel --prod
-7. https://jalalsons-clone.vercel.app
+7. https://cozy-cup-rose.vercel.app/
 8. 
 
 ## Notes
