@@ -4,6 +4,7 @@ import { ShopLayout } from "@/components/shop-layout";
 import type { ProductSummary } from "@/lib/types";
 
 export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export default async function ShopPage() {
   const [categories, products] = await Promise.all([listCategoryTree(), listProducts()]);

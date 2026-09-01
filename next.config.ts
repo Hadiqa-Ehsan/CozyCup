@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Add this to skip Prisma during build
+  output: 'standalone',
 };
 
 export default nextConfig;
