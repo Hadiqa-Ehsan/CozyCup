@@ -13,7 +13,7 @@ const categoriesData = [
       { name: "Bread", image: "/images/bread.jpg" },
       { name: "Cakes", image: "/images/cakes.jpg" },
       { name: "Pastries", image: "/images/pastries.jpg" },
-      { name: "Donuts & Cupcakes", image: "/images/donuts.jpg" },
+      { name: "Donuts ", image: "/images/donuts.jpg" },
       { name: "Brownies", image: "/images/brownie.jpg" },
       { name: "Buns", image: "/images/buns.jpg" },
       { name: "Biscuits", image: "/images/biscuits.jpg" },
