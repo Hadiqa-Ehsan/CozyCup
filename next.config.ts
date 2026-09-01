@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Disable image optimization to fix 400 errors
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -17,8 +19,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Add this to skip Prisma during build
-  output: 'standalone',
 };
 
 export default nextConfig;
