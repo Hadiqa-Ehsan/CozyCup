@@ -31,31 +31,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F3EDD8] p-4 lg:p-6 text-[#A87A53] flex flex-col justify-between">
+    <div className="min-h-screen bg-[#F3EDD8] p-4 lg:p-6 text-[#2D231F] flex flex-col justify-between">
       {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed left-4 top-4 z-50 rounded-2xl bg-[#A87A53] p-2.5 text-[#F3EDD8] shadow-lg lg:hidden"
+        className="fixed left-4 top-4 z-50 rounded-2xl bg-[#2D231F] p-2.5 text-[#F3EDD8] shadow-lg lg:hidden"
       >
         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
       <div className="mx-auto flex w-full max-w-7xl gap-6 flex-1">
-        {/* Sidebar */}
+        {/* Sidebar matching store header brown #2D231F */}
         <aside
-          className={`fixed inset-y-4 left-4 z-40 w-64 rounded-3xl bg-[#A87A53] p-6 shadow-xl transition-transform duration-300 lg:static lg:flex lg:flex-col ${
+          className={`fixed inset-y-4 left-4 z-40 w-64 rounded-3xl bg-[#2D231F] p-6 shadow-xl transition-transform duration-300 lg:static lg:flex lg:flex-col ${
             sidebarOpen ? "translate-x-0" : "-translate-x-[120%] lg:translate-x-0"
           }`}
         >
-          {/* Admin Profile Box */}
-          <div className="rounded-2xl bg-[#F3EDD8] p-4 text-[#A87A53] shadow-inner border border-[#BDD390]">
+          {/* Profile Box */}
+          <div className="rounded-2xl bg-white/10 p-4 text-[#F3EDD8] border border-white/10">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#BDD390] font-black text-[#A87A53]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#BDD390] font-black text-[#2D231F]">
                 CC
               </div>
               <div>
-                <h2 className="text-sm font-bold text-[#A87A53]">Cozy Admin</h2>
-                <p className="text-xs font-semibold text-[#A87A53]/70">Store Manager</p>
+                <h2 className="text-sm font-bold text-white">Cozy Admin</h2>
+                <p className="text-xs font-semibold text-[#BDD390]">Store Manager</p>
               </div>
             </div>
           </div>
@@ -70,48 +70,48 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3.5 rounded-2xl px-4 py-3 text-sm font-semibold transition-all ${
                     isActive
-                      ? "bg-[#BDD390] text-[#A87A53] shadow-md font-bold"
-                      : "text-white/90 hover:bg-white/10 hover:text-white"
+                      ? "bg-[#BDD390] text-[#2D231F] shadow-md font-extrabold"
+                      : "text-[#F3EDD8]/80 hover:bg-white/10 hover:text-white"
                   }`}
                 >
-                  <item.icon className={`h-5 w-5 ${isActive ? "text-[#A87A53]" : "text-[#BDD390]"}`} />
+                  <item.icon className={`h-5 w-5 ${isActive ? "text-[#2D231F]" : "text-[#BDD390]"}`} />
                   {item.name}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="pt-4 border-t border-white/20">
-            <button className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-red-200 transition-all hover:bg-red-500/20">
+          <div className="pt-4 border-t border-white/10">
+            <button className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-red-300 transition-all hover:bg-red-500/20">
               <LogOut className="h-5 w-5" />
               Log Out
             </button>
           </div>
         </aside>
 
-        {/* Main Content Area */}
-        <main className="flex-1 rounded-3xl bg-white p-6 lg:p-8 text-[#A87A53] shadow-xl border border-[#BDD390]/60">
+        {/* Main Content Card Area */}
+        <main className="flex-1 rounded-3xl bg-white p-6 lg:p-8 text-[#2D231F] shadow-xl border border-[#BDD390]/50">
           {children}
         </main>
       </div>
 
-      {/* Reference Footer Section Matching Image Design */}
-      <footer className="mx-auto mt-8 w-full max-w-7xl rounded-3xl bg-[#A87A53] px-8 py-10 text-[#F3EDD8] shadow-xl">
+      {/* Footer matching exact header brown */}
+      <footer className="mx-auto mt-8 w-full max-w-7xl rounded-3xl bg-[#2D231F] px-8 py-10 text-[#F3EDD8] shadow-xl">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-5">
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#BDD390] text-[#A87A53]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#BDD390] text-[#2D231F]">
                 <Coffee className="h-4 w-4" />
               </div>
-              <span className="text-lg font-black tracking-wider text-white">COZYCUP</span>
+              <span className="text-lg font-black tracking-wider text-white">COZY CUP</span>
             </div>
-            <p className="text-xs text-[#F3EDD8]/80 max-w-sm leading-relaxed">
-               Artisanal coffee, fresh bakery items, and daily essentials delivered right to your doorstep with love and care.
+            <p className="text-xs text-[#F3EDD8]/70 max-w-sm leading-relaxed">
+              Artisanal coffee, fresh bakery items, and daily essentials delivered right to your doorstep with love and care.
             </p>
             <div className="flex items-center gap-3 pt-2">
-              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#A87A53] transition-colors"><Globe className="h-4 w-4" /></a>
-              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#A87A53] transition-colors"><Share2 className="h-4 w-4" /></a>
-              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#A87A53] transition-colors"><MessageCircle className="h-4 w-4" /></a>
+              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#2D231F] transition-colors"><Globe className="h-4 w-4 text-[#BDD390]" /></a>
+              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#2D231F] transition-colors"><Share2 className="h-4 w-4 text-[#BDD390]" /></a>
+              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#2D231F] transition-colors"><MessageCircle className="h-4 w-4 text-[#BDD390]" /></a>
             </div>
           </div>
 
@@ -127,7 +127,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div>
             <h3 className="text-xs font-bold uppercase tracking-widest text-[#BDD390]">Company</h3>
             <ul className="mt-4 space-y-2 text-xs font-medium text-[#F3EDD8]/80">
-              <li><a href="#" className="hover:text-white">About CozyCup</a></li>
+              <li><a href="#" className="hover:text-white">About Cozy Cup</a></li>
               <li><a href="#" className="hover:text-white">Careers</a></li>
               <li><a href="#" className="hover:text-white">FAQ</a></li>
             </ul>
@@ -136,15 +136,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div>
             <h3 className="text-xs font-bold uppercase tracking-widest text-[#BDD390]">Contact</h3>
             <ul className="mt-4 space-y-2 text-xs font-medium text-[#F3EDD8]/80">
-              <li>+92 (555) 019-2200</li>
-              <li>hello@cozycup.kitchen</li>
+              <li>+92 300 4805000</li>
+              <li>Info@CozyCup.com.pk</li>
               <li>5 branches • citywide</li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center justify-between border-t border-white/10 pt-6 text-[11px] text-[#F3EDD8]/60 sm:flex-row">
-          <p>© 2026 CozyCup Kitchen. All rights reserved.</p>
+        <div className="mt-8 flex flex-col items-center justify-between border-t border-white/10 pt-6 text-[11px] text-[#F3EDD8]/50 sm:flex-row">
+          <p>© 2026 Cozy Cup. All rights reserved.</p>
           <p>Fresh daily, delivered hot.</p>
         </div>
       </footer>
