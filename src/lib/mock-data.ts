@@ -109,7 +109,7 @@ export const mockProducts = [
   { id: "8", name: "Brown Bread", slug: "brown-bread", priceCents: 29800, stock: 10, isDeal: false, currency: "PKR", unit: "400 G", categorySlug: "bread", imageUrl: "/images/sub-brown-bread.jpg" },
 
   // Cakes
-  { id: "21", name: "Chocolate Cake", slug: "bakery-chocolate-cake", priceCents: 159800, stock: 10, isDeal: false, currency: "PKR", unit: "500 G", categorySlug: "cakes", imageUrl: "/images/sub-chocolate-cake.jpg" },
+  { id: "21", name: "Chocolate Cake", slug: "bakery-chocolate-cake", priceCents: 159800, stock: 10, isDeal: false, currency: "PKR", unit: "500 G", categorySlug: "cakes", imageUrl: "/images/cake2.jpg" },
   { id: "22", name: "Vanilla Cake", slug: "bakery-vanilla-cake", priceCents: 129800, stock: 10, isDeal: false, currency: "PKR", unit: "500 G", categorySlug: "cakes", imageUrl: "/images/sub-vanilla-cake.jpg" },
 
   // Pastries
