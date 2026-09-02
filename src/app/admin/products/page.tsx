@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Coffee, Plus, Search, Trash2, Edit3, X, Check } from "lucide-react";
+import { Coffee, Plus, Search, Trash2, Edit3 } from "lucide-react";
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   category: string;
   price: number;
@@ -14,33 +14,96 @@ interface Product {
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([
-    { id: 1, name: "Caramel Macchiato", category: "Beverages", price: 580, stock: 45, status: "Available" },
-    { id: 2, name: "Artisan Butter Croissant", category: "Bakery", price: 420, stock: 25, status: "Available" },
-    { id: 3, name: "Organic Cheddar Slice", category: "Dairy", price: 350, stock: 18, status: "Available" },
-    { id: 4, name: "Crispy Zinger Burger", category: "Fast Food", price: 750, stock: 30, status: "Available" },
-    { id: 5, name: "Belgian Chocolate Fudge", category: "Sweets", price: 490, stock: 12, status: "Available" },
-    { id: 6, name: "Smoked Turkey Deli Sandwich", category: "Deli", price: 680, stock: 10, status: "Available" },
-    { id: 7, name: "Teriyaki Chicken Bao", category: "Pan Asian", price: 820, stock: 15, status: "Available" },
+    { id: "1", name: "JS Bread Roll", category: "Bakery", price: 495, stock: 10, status: "Available" },
+    { id: "2", name: "JS Cheese Crust Roll", category: "Bakery", price: 595, stock: 10, status: "Available" },
+    { id: "7", name: "White Bread", category: "Bakery", price: 248, stock: 10, status: "Available" },
+    { id: "8", name: "Brown Bread", category: "Bakery", price: 298, stock: 10, status: "Available" },
+    { id: "21", name: "Chocolate Cake", category: "Bakery", price: 1598, stock: 10, status: "Available" },
+    { id: "22", name: "Vanilla Cake", category: "Bakery", price: 1298, stock: 10, status: "Available" },
+    { id: "23", name: "Cream Pastry", category: "Bakery", price: 398, stock: 10, status: "Available" },
+    { id: "24", name: "Fruit Pastry", category: "Bakery", price: 498, stock: 10, status: "Available" },
+    { id: "25", name: "Glazed Donut", category: "Bakery", price: 198, stock: 10, status: "Available" },
+    { id: "26", name: "Chocolate Donut", category: "Bakery", price: 248, stock: 10, status: "Available" },
+    { id: "27", name: "Walnut Brownie", category: "Bakery", price: 298, stock: 10, status: "Available" },
+    { id: "28", name: "Chocolate Brownie", category: "Bakery", price: 348, stock: 10, status: "Available" },
+    { id: "29", name: "Burger Bun", category: "Bakery", price: 148, stock: 10, status: "Available" },
+    { id: "30", name: "Sandwich Bun", category: "Bakery", price: 198, stock: 10, status: "Available" },
+    { id: "31", name: "Butter Biscuit", category: "Bakery", price: 198, stock: 10, status: "Available" },
+    { id: "32", name: "Chocolate Biscuit", category: "Bakery", price: 248, stock: 10, status: "Available" },
+    { id: "33", name: "Plain Rusk", category: "Bakery", price: 298, stock: 10, status: "Available" },
+    { id: "34", name: "Sweet Rusk", category: "Bakery", price: 348, stock: 10, status: "Available" },
+    { id: "9", name: "Fresh Organic Milk", category: "Dairy", price: 248, stock: 10, status: "Available" },
+    { id: "35", name: "Full Cream Milk", category: "Dairy", price: 248, stock: 10, status: "Available" },
+    { id: "36", name: "Skimmed Milk", category: "Dairy", price: 198, stock: 10, status: "Available" },
+    { id: "37", name: "Plain Yogurt", category: "Dairy", price: 198, stock: 10, status: "Available" },
+    { id: "38", name: "Fruit Yogurt", category: "Dairy", price: 248, stock: 10, status: "Available" },
+    { id: "39", name: "Cheddar Cheese", category: "Dairy", price: 398, stock: 10, status: "Available" },
+    { id: "40", name: "Mozzarella Cheese", category: "Dairy", price: 498, stock: 10, status: "Available" },
+    { id: "41", name: "Salted Butter", category: "Dairy", price: 298, stock: 10, status: "Available" },
+    { id: "42", name: "Unsalted Butter", category: "Dairy", price: 298, stock: 10, status: "Available" },
+    { id: "43", name: "Whipping Cream", category: "Dairy", price: 348, stock: 10, status: "Available" },
+    { id: "44", name: "Sour Cream", category: "Dairy", price: 398, stock: 10, status: "Available" },
+    { id: "45", name: "Pure Ghee", category: "Dairy", price: 598, stock: 10, status: "Available" },
+    { id: "46", name: "Vanilla Ice Cream", category: "Dairy", price: 998, stock: 10, status: "Available" },
+    { id: "47", name: "Chocolate Ice Cream", category: "Dairy", price: 1098, stock: 10, status: "Available" },
+    { id: "11", name: "Mango Milk Cake Special", category: "Sweets", price: 1998, stock: 10, status: "Available" },
+    { id: "49", name: "Mango Cake", category: "Sweets", price: 1998, stock: 10, status: "Available" },
+    { id: "50", name: "Chocolate Cake", category: "Sweets", price: 1598, stock: 10, status: "Available" },
+    { id: "51", name: "Walnut Brownie", category: "Sweets", price: 298, stock: 10, status: "Available" },
+    { id: "52", name: "Glazed Donut", category: "Sweets", price: 198, stock: 10, status: "Available" },
+    { id: "53", name: "Vanilla Cupcake", category: "Sweets", price: 248, stock: 10, status: "Available" },
+    { id: "54", name: "Cream Pastry", category: "Sweets", price: 298, stock: 10, status: "Available" },
+    { id: "55", name: "Gulab Jamun", category: "Sweets", price: 398, stock: 10, status: "Available" },
+    { id: "56", name: "Jalebi", category: "Sweets", price: 298, stock: 10, status: "Available" },
+    { id: "13", name: "Classic Chicken Burger", category: "Fast Food", price: 498, stock: 10, status: "Available" },
+    { id: "57", name: "Crispy Chicken Burger", category: "Fast Food", price: 498, stock: 10, status: "Available" },
+    { id: "58", name: "Zinger Burger", category: "Fast Food", price: 698, stock: 10, status: "Available" },
+    { id: "59", name: "French Fries", category: "Fast Food", price: 298, stock: 10, status: "Available" },
+    { id: "60", name: "Chicken Nuggets", category: "Fast Food", price: 398, stock: 10, status: "Available" },
+    { id: "61", name: "Peri Peri Chicken", category: "Fast Food", price: 598, stock: 10, status: "Available" },
+    { id: "62", name: "Grilled Chicken Quarter", category: "Fast Food", price: 998, stock: 10, status: "Available" },
+    { id: "15", name: "Special Noodle Bowl", category: "Pan Asian", price: 598, stock: 10, status: "Available" },
+    { id: "63", name: "Chow Mein Noodles", category: "Pan Asian", price: 598, stock: 10, status: "Available" },
+    { id: "64", name: "Pad Thai", category: "Pan Asian", price: 698, stock: 10, status: "Available" },
+    { id: "65", name: "Egg Fried Rice", category: "Pan Asian", price: 498, stock: 10, status: "Available" },
+    { id: "66", name: "Chicken Fried Rice", category: "Pan Asian", price: 598, stock: 10, status: "Available" },
+    { id: "67", name: "Chicken Chow Mein", category: "Pan Asian", price: 598, stock: 10, status: "Available" },
+    { id: "68", name: "Vegetable Spring Rolls", category: "Pan Asian", price: 398, stock: 10, status: "Available" },
+    { id: "69", name: "Chicken Dumplings", category: "Pan Asian", price: 498, stock: 10, status: "Available" },
+    { id: "70", name: "Vegetable Stir Fry", category: "Pan Asian", price: 498, stock: 10, status: "Available" },
+    { id: "17", name: "Assorted Snacks", category: "Grocery", price: 298, stock: 10, status: "Available" },
+    { id: "71", name: "Potato Chips", category: "Grocery", price: 298, stock: 10, status: "Available" },
+    { id: "72", name: "Mixed Nuts", category: "Grocery", price: 798, stock: 10, status: "Available" },
+    { id: "73", name: "Chili Sauce", category: "Grocery", price: 198, stock: 10, status: "Available" },
+    { id: "74", name: "Black Pepper", category: "Grocery", price: 298, stock: 10, status: "Available" },
+    { id: "75", name: "Soft Drink", category: "Grocery", price: 148, stock: 10, status: "Available" },
+    { id: "76", name: "Fruit Juice", category: "Grocery", price: 198, stock: 10, status: "Available" },
+    { id: "77", name: "Olive Oil", category: "Grocery", price: 898, stock: 10, status: "Available" },
+    { id: "78", name: "Canola Oil", category: "Grocery", price: 698, stock: 10, status: "Available" },
+    { id: "19", name: "Deli Chicken Breast", category: "Deli", price: 798, stock: 10, status: "Available" },
+    { id: "79", name: "Roast Chicken", category: "Deli", price: 798, stock: 10, status: "Available" },
+    { id: "80", name: "Roast Beef", category: "Deli", price: 998, stock: 10, status: "Available" },
+    { id: "81", name: "Ham Slices", category: "Deli", price: 698, stock: 10, status: "Available" },
+    { id: "82", name: "Salami Slices", category: "Deli", price: 798, stock: 10, status: "Available" },
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  const categories = ["All", "Bakery", "Dairy", "Fast Food", "Sweets", "Deli", "Pan Asian", "Beverages"];
+  const categories = ["All", "Bakery", "Dairy", "Sweets", "Fast Food", "Pan Asian", "Grocery", "Deli"];
 
-  // Add & Edit state
   const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   
   const [name, setName] = useState("");
-  const [category, setCategory] = useState("Beverages");
+  const [category, setCategory] = useState("Bakery");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
 
   const handleOpenAdd = () => {
     setEditingId(null);
     setName("");
-    setCategory("Beverages");
+    setCategory("Bakery");
     setPrice("");
     setStock("");
     setIsAdding(true);
@@ -60,7 +123,6 @@ export default function AdminProductsPage() {
     if (!name || !price || !stock) return;
 
     if (editingId !== null) {
-      // Edit mode
       setProducts(
         products.map((p) =>
           p.id === editingId
@@ -76,9 +138,8 @@ export default function AdminProductsPage() {
         )
       );
     } else {
-      // Add mode
       const newItem: Product = {
-        id: Date.now(),
+        id: Date.now().toString(),
         name,
         category,
         price: Number(price),
@@ -95,8 +156,21 @@ export default function AdminProductsPage() {
     setStock("");
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     setProducts(products.filter((p) => p.id !== id));
+  };
+
+  const toggleStatus = (id: string) => {
+    setProducts(
+      products.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              status: p.status === "Available" ? "Out of Stock" : "Available",
+            }
+          : p
+      )
+    );
   };
 
   const filteredProducts = products.filter((p) => {
@@ -107,11 +181,10 @@ export default function AdminProductsPage() {
 
   return (
     <div className="space-y-8 text-[#3D2E24] font-sans pb-12">
-      {/* Header */}
       <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/80 p-6 backdrop-blur-[12px] border border-[#BDD390] shadow-md sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-black text-[#3D2E24]">Menu & Products Inventory</h1>
-          <p className="text-sm font-medium text-[#3D2E24]/70">Manage your store items across all 7 categories.</p>
+          <p className="text-sm font-medium text-[#3D2E24]/70">Manage all actual store items across categories.</p>
         </div>
         <button
           onClick={handleOpenAdd}
@@ -121,7 +194,6 @@ export default function AdminProductsPage() {
         </button>
       </header>
 
-      {/* Add / Edit Form Modal/Drawer */}
       {isAdding && (
         <form onSubmit={handleSaveProduct} className="rounded-3xl bg-[#F3EDD8] p-6 border-2 border-[#3D2E24]/20 shadow-xl space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
           <h3 className="text-lg font-black text-[#3D2E24] flex items-center gap-2">
@@ -192,7 +264,6 @@ export default function AdminProductsPage() {
         </form>
       )}
 
-      {/* Search and Category Filter Pills */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3D2E24]/50" />
@@ -205,7 +276,6 @@ export default function AdminProductsPage() {
           />
         </div>
 
-        {/* 7 Categories Filter Pills */}
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button
@@ -223,7 +293,6 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* Products Table */}
       <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-[#BDD390]/60">
@@ -233,7 +302,7 @@ export default function AdminProductsPage() {
                 <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Category</th>
                 <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Price</th>
                 <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Stock</th>
-                <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Status</th>
+                <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Status (Click to Toggle)</th>
                 <th className="py-3 text-right text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -259,15 +328,17 @@ export default function AdminProductsPage() {
                     <td className="py-4 text-xs font-bold text-[#3D2E24]">PKR {product.price}</td>
                     <td className="py-4 text-xs font-medium text-[#3D2E24]">{product.stock} units</td>
                     <td className="py-4 text-xs">
-                      <span
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${
+                      <button
+                        onClick={() => toggleStatus(product.id)}
+                        title="Click to toggle status"
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold cursor-pointer transition-transform active:scale-95 ${
                           product.status === "Available"
-                            ? "bg-emerald-200 text-emerald-900 border border-emerald-300"
-                            : "bg-rose-200 text-rose-900 border border-rose-300"
+                            ? "bg-emerald-200 text-emerald-900 border border-emerald-300 hover:bg-emerald-300"
+                            : "bg-rose-200 text-rose-900 border border-rose-300 hover:bg-rose-300"
                         }`}
                       >
-                        {product.status}
-                      </span>
+                        {product.status} 🔄
+                      </button>
                     </td>
                     <td className="py-4 text-right space-x-2">
                       <button
