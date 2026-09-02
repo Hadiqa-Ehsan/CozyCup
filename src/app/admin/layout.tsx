@@ -62,7 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <nav className="mt-6 flex-1 space-y-2">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+              const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.href}
@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Main Content Card Area */}
-        <main className="flex-1 rounded-3xl bg-white p-6 lg:p-8 text-[#2D231F] shadow-xl border border-[#BDD390]/50">
+        <main className="flex-1 rounded-3xl bg-white p-6 lg:p-8 text-[#2D231F] shadow-xl border border-[#BDD390]/50 overflow-y-auto max-h-[calc(100vh-12rem)]">
           {children}
         </main>
       </div>

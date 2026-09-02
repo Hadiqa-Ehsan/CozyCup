@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Coffee, Plus, Search, Trash2, Edit3, Check, X, Tag, DollarSign, Package } from "lucide-react";
+import { Coffee, Plus, Search, Trash2, Edit3, X, Check } from "lucide-react";
 
 interface Product {
   id: number;
@@ -14,41 +14,85 @@ interface Product {
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([
-    { id: 1, name: "Caramel Macchiato", category: "Espresso & Coffee", price: 580, stock: 45, status: "Available" },
-    { id: 2, name: "Classic Croissant", category: "Bakery & Pastry", price: 420, stock: 20, status: "Available" },
-    { id: 3, name: "Iced Vanilla Latte", category: "Cold Beverages", price: 650, stock: 30, status: "Available" },
-    { id: 4, name: "Blueberry Muffin", category: "Bakery & Pastry", price: 380, stock: 0, status: "Out of Stock" },
-    { id: 5, name: "Mocha Frappe", category: "Cold Beverages", price: 720, stock: 15, status: "Available" },
+    { id: 1, name: "Caramel Macchiato", category: "Beverages", price: 580, stock: 45, status: "Available" },
+    { id: 2, name: "Artisan Butter Croissant", category: "Bakery", price: 420, stock: 25, status: "Available" },
+    { id: 3, name: "Organic Cheddar Slice", category: "Dairy", price: 350, stock: 18, status: "Available" },
+    { id: 4, name: "Crispy Zinger Burger", category: "Fast Food", price: 750, stock: 30, status: "Available" },
+    { id: 5, name: "Belgian Chocolate Fudge", category: "Sweets", price: 490, stock: 12, status: "Available" },
+    { id: 6, name: "Smoked Turkey Deli Sandwich", category: "Deli", price: 680, stock: 10, status: "Available" },
+    { id: 7, name: "Teriyaki Chicken Bao", category: "Pan Asian", price: 820, stock: 15, status: "Available" },
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // Form state for adding new product
+  const categories = ["All", "Bakery", "Dairy", "Fast Food", "Sweets", "Deli", "Pan Asian", "Beverages"];
+
+  // Add & Edit state
   const [isAdding, setIsAdding] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newCategory, setNewCategory] = useState("Espresso & Coffee");
-  const [newPrice, setNewPrice] = useState("");
-  const [newStock, setNewStock] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("Beverages");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
 
-  const handleAddProduct = (e: React.FormEvent) => {
+  const handleOpenAdd = () => {
+    setEditingId(null);
+    setName("");
+    setCategory("Beverages");
+    setPrice("");
+    setStock("");
+    setIsAdding(true);
+  };
+
+  const handleOpenEdit = (product: Product) => {
+    setEditingId(product.id);
+    setName(product.name);
+    setCategory(product.category);
+    setPrice(product.price.toString());
+    setStock(product.stock.toString());
+    setIsAdding(true);
+  };
+
+  const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName || !newPrice || !newStock) return;
+    if (!name || !price || !stock) return;
 
-    const newItem: Product = {
-      id: Date.now(),
-      name: newName,
-      category: newCategory,
-      price: Number(newPrice),
-      stock: Number(newStock),
-      status: Number(newStock) > 0 ? "Available" : "Out of Stock",
-    };
+    if (editingId !== null) {
+      // Edit mode
+      setProducts(
+        products.map((p) =>
+          p.id === editingId
+            ? {
+                ...p,
+                name,
+                category,
+                price: Number(price),
+                stock: Number(stock),
+                status: Number(stock) > 0 ? "Available" : "Out of Stock",
+              }
+            : p
+        )
+      );
+    } else {
+      // Add mode
+      const newItem: Product = {
+        id: Date.now(),
+        name,
+        category,
+        price: Number(price),
+        stock: Number(stock),
+        status: Number(stock) > 0 ? "Available" : "Out of Stock",
+      };
+      setProducts([newItem, ...products]);
+    }
 
-    setProducts([newItem, ...products]);
-    setNewName("");
-    setNewPrice("");
-    setNewStock("");
     setIsAdding(false);
+    setEditingId(null);
+    setName("");
+    setPrice("");
+    setStock("");
   };
 
   const handleDelete = (id: number) => {
@@ -66,22 +110,22 @@ export default function AdminProductsPage() {
       {/* Header */}
       <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/80 p-6 backdrop-blur-[12px] border border-[#BDD390] shadow-md sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black text-[#3D2E24]">Menu & Products Management</h1>
-          <p className="text-sm font-medium text-[#3D2E24]/70">Add, edit, and track CozyCup café items in real-time.</p>
+          <h1 className="text-2xl font-black text-[#3D2E24]">Menu & Products Inventory</h1>
+          <p className="text-sm font-medium text-[#3D2E24]/70">Manage your store items across all 7 categories.</p>
         </div>
         <button
-          onClick={() => setIsAdding(!isAdding)}
+          onClick={handleOpenAdd}
           className="flex items-center gap-2 rounded-2xl bg-[#3D2E24] text-[#BDD390] px-5 py-3 text-xs font-black shadow-md hover:brightness-110 transition-all"
         >
-          <Plus className="h-4 w-4" /> {isAdding ? "Close Form" : "Add New Item"}
+          <Plus className="h-4 w-4" /> Add New Item
         </button>
       </header>
 
-      {/* Add Product Inline Form Drawer */}
+      {/* Add / Edit Form Modal/Drawer */}
       {isAdding && (
-        <form onSubmit={handleAddProduct} className="rounded-3xl bg-[#F3EDD8] p-6 border-2 border-[#3D2E24]/20 shadow-xl space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+        <form onSubmit={handleSaveProduct} className="rounded-3xl bg-[#F3EDD8] p-6 border-2 border-[#3D2E24]/20 shadow-xl space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
           <h3 className="text-lg font-black text-[#3D2E24] flex items-center gap-2">
-            <Coffee className="h-5 w-5" /> Add New Café Item
+            <Coffee className="h-5 w-5" /> {editingId !== null ? "Edit Product Item" : "Add New Product"}
           </h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
             <div>
@@ -89,8 +133,8 @@ export default function AdminProductsPage() {
               <input
                 type="text"
                 placeholder="e.g. Spanish Latte"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full rounded-xl border border-[#BDD390] bg-white/80 p-2.5 text-sm font-medium focus:outline-none"
                 required
               />
@@ -98,14 +142,13 @@ export default function AdminProductsPage() {
             <div>
               <label className="block text-xs font-bold text-[#3D2E24]/70 mb-1">Category</label>
               <select
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
                 className="w-full rounded-xl border border-[#BDD390] bg-white/80 p-2.5 text-sm font-medium focus:outline-none"
               >
-                <option value="Espresso & Coffee">Espresso & Coffee</option>
-                <option value="Cold Beverages">Cold Beverages</option>
-                <option value="Bakery & Pastry">Bakery & Pastry</option>
-                <option value="Desserts">Desserts</option>
+                {categories.filter(c => c !== "All").map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -113,19 +156,19 @@ export default function AdminProductsPage() {
               <input
                 type="number"
                 placeholder="550"
-                value={newPrice}
-                onChange={(e) => setNewPrice(e.target.value)}
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
                 className="w-full rounded-xl border border-[#BDD390] bg-white/80 p-2.5 text-sm font-medium focus:outline-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#3D2E24]/70 mb-1">Initial Stock Units</label>
+              <label className="block text-xs font-bold text-[#3D2E24]/70 mb-1">Stock Units</label>
               <input
                 type="number"
                 placeholder="25"
-                value={newStock}
-                onChange={(e) => setNewStock(e.target.value)}
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
                 className="w-full rounded-xl border border-[#BDD390] bg-white/80 p-2.5 text-sm font-medium focus:outline-none"
                 required
               />
@@ -143,13 +186,13 @@ export default function AdminProductsPage() {
               type="submit"
               className="rounded-xl bg-[#3D2E24] text-[#BDD390] px-6 py-2 text-xs font-black shadow-md"
             >
-              Save Item
+              {editingId !== null ? "Update Item" : "Save Item"}
             </button>
           </div>
         </form>
       )}
 
-      {/* Filter and Search Bar */}
+      {/* Search and Category Filter Pills */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3D2E24]/50" />
@@ -162,9 +205,9 @@ export default function AdminProductsPage() {
           />
         </div>
 
-        {/* Category Filter Pills */}
+        {/* 7 Categories Filter Pills */}
         <div className="flex flex-wrap gap-2">
-          {["All", "Espresso & Coffee", "Cold Beverages", "Bakery & Pastry", "Desserts"].map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
@@ -198,7 +241,7 @@ export default function AdminProductsPage() {
               {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-xs text-[#3D2E24]/60">
-                    No items found matching your search.
+                    No items found matching your filters.
                   </td>
                 </tr>
               ) : (
@@ -210,7 +253,9 @@ export default function AdminProductsPage() {
                       </div>
                       {product.name}
                     </td>
-                    <td className="py-4 text-xs font-medium text-[#3D2E24]/80">{product.category}</td>
+                    <td className="py-4 text-xs font-medium text-[#3D2E24]/80">
+                      <span className="bg-[#BDD390]/50 px-2.5 py-1 rounded-lg font-bold">{product.category}</span>
+                    </td>
                     <td className="py-4 text-xs font-bold text-[#3D2E24]">PKR {product.price}</td>
                     <td className="py-4 text-xs font-medium text-[#3D2E24]">{product.stock} units</td>
                     <td className="py-4 text-xs">
@@ -225,6 +270,13 @@ export default function AdminProductsPage() {
                       </span>
                     </td>
                     <td className="py-4 text-right space-x-2">
+                      <button
+                        onClick={() => handleOpenEdit(product)}
+                        className="rounded-xl bg-white/80 p-2 text-[#3D2E24] hover:bg-[#3D2E24] hover:text-[#BDD390] transition-all shadow-sm border border-[#BDD390]"
+                        title="Edit Item"
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </button>
                       <button
                         onClick={() => handleDelete(product.id)}
                         className="rounded-xl bg-white/80 p-2 text-rose-700 hover:bg-rose-700 hover:text-white transition-all shadow-sm border border-[#BDD390]"
