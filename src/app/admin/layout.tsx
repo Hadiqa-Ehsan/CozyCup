@@ -43,54 +43,56 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="mx-auto flex w-full max-w-7xl gap-6 flex-1">
         {/* Sidebar matching store header brown #2D231F */}
         <aside
-          className={`fixed inset-y-4 left-4 z-40 w-64 rounded-3xl bg-[#2D231F] p-6 shadow-xl transition-transform duration-300 lg:static lg:flex lg:flex-col ${
+          className={`fixed inset-y-4 left-4 z-40 w-64 rounded-3xl bg-[#2D231F] p-6 shadow-xl transition-transform duration-300 lg:static lg:flex lg:flex-col lg:justify-between ${
             sidebarOpen ? "translate-x-0" : "-translate-x-[120%] lg:translate-x-0"
           }`}
         >
-          {/* Profile Box */}
-          <div className="rounded-2xl bg-white/10 p-4 text-[#F3EDD8] border border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#BDD390] font-black text-[#2D231F]">
-                CC
-              </div>
-              <div>
-                <h2 className="text-sm font-bold text-white">Cozy Admin</h2>
-                <p className="text-xs font-semibold text-[#BDD390]">Store Manager</p>
+          <div className="space-y-6">
+            {/* Profile Box */}
+            <div className="rounded-2xl bg-[#3D312B] p-4 text-[#F3EDD8] border border-[#BDD390]/20">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#BDD390] font-black text-[#2D231F]">
+                  CC
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-white">Cozy Admin</h2>
+                  <p className="text-xs font-semibold text-[#BDD390]">Store Manager</p>
+                </div>
               </div>
             </div>
+
+            <nav className="space-y-2">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center gap-3.5 rounded-2xl px-4 py-3.5 text-sm font-semibold transition-all ${
+                      isActive
+                        ? "bg-[#BDD390] text-[#2D231F] shadow-md font-extrabold"
+                        : "text-[#F3EDD8]/80 hover:bg-white/5 hover:text-white"
+                    }`}
+                  >
+                    <item.icon className={`h-5 w-5 ${isActive ? "text-[#2D231F]" : "text-[#BDD390]"}`} />
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
 
-          <nav className="mt-6 flex-1 space-y-2">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3.5 rounded-2xl px-4 py-3 text-sm font-semibold transition-all ${
-                    isActive
-                      ? "bg-[#BDD390] text-[#2D231F] shadow-md font-extrabold"
-                      : "text-[#F3EDD8]/80 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  <item.icon className={`h-5 w-5 ${isActive ? "text-[#2D231F]" : "text-[#BDD390]"}`} />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
-
           <div className="pt-4 border-t border-white/10">
-            <button className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-red-300 transition-all hover:bg-red-500/20">
+            <button className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold text-rose-300 transition-all hover:bg-rose-500/20">
               <LogOut className="h-5 w-5" />
               Log Out
             </button>
           </div>
         </aside>
 
-        {/* Main Content Card Area */}
-        <main className="flex-1 rounded-3xl bg-white p-6 lg:p-8 text-[#2D231F] shadow-xl border border-[#BDD390]/50 overflow-y-auto max-h-[calc(100vh-12rem)]">
+        {/* Main Content Area - Full height matching sidebar layout */}
+        <main className="flex-1 rounded-3xl bg-white p-6 lg:p-8 text-[#2D231F] shadow-xl border border-[#BDD390]/50 overflow-y-auto">
           {children}
         </main>
       </div>
