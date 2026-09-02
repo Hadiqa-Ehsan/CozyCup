@@ -1,6 +1,7 @@
 import { HeroCarousel } from "@/components/hero-carousel";
 import { CategoryGrid } from "@/components/category-grid";
 import { CategoryProductScroll } from "@/components/category-product-scroll";
+import { AdminAccessButton } from "@/components/admin-access-button";
 
 // Category Data with Products
 const categoryData = {
@@ -101,7 +102,7 @@ const mockCategories = [
 
 export default async function Home() {
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6 bg-[#F3EDD8] min-h-screen">
+    <main className="mx-auto max-w-7xl px-4 py-6 bg-[#F3EDD8] min-h-screen relative">
 
       {/* Hero Carousel */}
       <HeroCarousel />
@@ -153,6 +154,9 @@ export default async function Home() {
           </p>
         </div>
       </section>
+
+      {/* Floating Admin Portal Access Button */}
+      <AdminAccessButton />
     </main>
   );
 }
