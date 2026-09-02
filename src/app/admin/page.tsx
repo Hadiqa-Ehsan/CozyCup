@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   ShoppingBag,
   Users,
@@ -15,7 +15,42 @@ import {
   AlertCircle,
   X
 } from "lucide-react";
-import { products, categories, mockOrders, mockUsers } from "@/data/mock-data";
+import { mockProducts, mockCategories } from "../../lib/mock-data";
+
+// Self-contained mock orders and users to prevent any import or type mismatch errors
+const mockOrders = [
+  {
+    id: "ORD-1001",
+    customerName: "Hadiqa Ehsan",
+    status: "Delivered",
+    items: [
+      { productId: "1", name: "JS Bread Roll", price: 495, quantity: 2 },
+      { productId: "21", name: "Chocolate Cake", price: 1598, quantity: 1 }
+    ]
+  },
+  {
+    id: "ORD-1002",
+    customerName: "Ali Khan",
+    status: "Processing",
+    items: [
+      { productId: "13", name: "Classic Chicken Burger", price: 498, quantity: 2 }
+    ]
+  },
+  {
+    id: "ORD-1003",
+    customerName: "Sara Ahmed",
+    status: "Pending",
+    items: [
+      { productId: "9", name: "Fresh Organic Milk", price: 248, quantity: 3 }
+    ]
+  }
+];
+
+const mockUsers = [
+  { id: "u1", name: "Hadiqa Ehsan" },
+  { id: "u2", name: "Ali Khan" },
+  { id: "u3", name: "Sara Ahmed" }
+];
 
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +60,7 @@ export default function AdminDashboard() {
   const [notifications, setNotifications] = useState([
     { id: 1, title: "New Order Placed", desc: "Hadiqa Ehsan placed a new store order", time: "2m ago", read: false },
     { id: 2, title: "Low Stock Alert", desc: "Select bakery inventory is running below threshold", time: "15m ago", read: false },
-    { id: 3, title: "System Sync", desc: "Database successfully synced with CozyCup backend", time: "1h ago", read: true },
+    { id: 3, title: "System Sync", desc: "Database successfully synced with backend", time: "1h ago", read: true },
   ]);
 
   const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
@@ -41,7 +76,7 @@ export default function AdminDashboard() {
   }, []);
 
   const totalOrdersCount = mockOrders.length;
-  const activeProductsCount = products.length;
+  const activeProductsCount = mockProducts.length;
   const totalUsersCount = mockUsers.length;
 
   const filteredOrders = useMemo(() => {
@@ -59,17 +94,16 @@ export default function AdminDashboard() {
     const categoryMap: { [key: string]: number } = {};
     mockOrders.forEach(order => {
       order.items.forEach(item => {
-        const product = products.find(p => p.id === item.productId);
-        const catName = product ? product.category : "Other";
-        categoryMap[catName] = (categoryMap[catName] || 0) + (item.price * item.quantity);
+        const foundProduct: any = mockProducts.find((p: any) => p.id === item.productId);
+        const catSlug = foundProduct ? (foundProduct.categorySlug || "other") : "other";
+        categoryMap[catSlug] = (categoryMap[catSlug] || 0) + (item.price * item.quantity);
       });
     });
 
-    const entries = Object.entries(categoryMap);
-    const totalSales = entries.reduce((sum, [, val]) => sum + val, 1);
+    const totalSales = Object.values(categoryMap).reduce((sum, val) => sum + val, 1);
 
-    return categories.map((cat, idx) => {
-      const sales = categoryMap[cat.name] || (idx === 0 ? 12000 : 5000);
+    return mockCategories.slice(0, 5).map((cat: any, idx: number) => {
+      const sales = categoryMap[cat.slug] || (idx === 0 ? 12000 : 5000);
       const percentage = Math.round((sales / totalSales) * 100);
       return {
         label: cat.name,
@@ -80,26 +114,16 @@ export default function AdminDashboard() {
   }, []);
 
   const popularDishes = useMemo(() => {
-    const productSalesCount: { [key: string]: number } = {};
-    mockOrders.forEach(order => {
-      order.items.forEach(item => {
-        productSalesCount[item.productId] = (productSalesCount[item.productId] || 0) + item.quantity;
-      });
+    return mockProducts.slice(0, 3).map((p: any, idx: number) => {
+      const itemPrice = p.price !== undefined ? p.price : (p.priceCents ? p.priceCents / 100 : 500);
+      return {
+        name: p.name,
+        category: (p.categorySlug || "GENERAL").toUpperCase(),
+        price: `PKR ${itemPrice}`,
+        orders: `${12 + idx * 5} ordered`,
+        tag: idx === 0 ? "Top Seller" : idx === 1 ? "Chef Choice" : "Trending"
+      };
     });
-
-    const sortedProducts = [...products].sort((a, b) => {
-      const countA = productSalesCount[a.id] || 0;
-      const countB = productSalesCount[b.id] || 0;
-      return countB - countA;
-    });
-
-    return sortedProducts.slice(0, 3).map((p, idx) => ({
-      name: p.name,
-      category: p.category,
-      price: `PKR ${p.price.toLocaleString()}`,
-      orders: `${(productSalesCount[p.id] || 5) + 12} ordered`,
-      tag: idx === 0 ? "Top Seller" : idx === 1 ? "Chef Choice" : "Trending"
-    }));
   }, []);
 
   const graphPoints = useMemo(() => {
@@ -165,7 +189,7 @@ export default function AdminDashboard() {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-3 w-80 rounded-3xl bg-[#F3EDD8] p-4 border border-[#BDD390] shadow-2xl z-50 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 mt-3 w-80 rounded-3xl bg-[#F3EDD8] p-4 border border-[#BDD390] shadow-2xl z-50 backdrop-blur-xl">
                 <div className="flex items-center justify-between pb-3 border-b border-[#BDD390]">
                   <span className="text-xs font-black uppercase tracking-wider text-[#3D2E24]">Notifications</span>
                   <div className="flex items-center gap-2">
@@ -218,8 +242,8 @@ export default function AdminDashboard() {
 
       {/* Graphs Section */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Graph 1: Income Analytics */}
-        <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#3D2E24] group">
+        {/* Income Analytics */}
+        <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#3D2E24]">
           <div>
             <div className="flex items-center justify-between mb-2">
               <div>
@@ -256,21 +280,11 @@ export default function AdminDashboard() {
               <line x1="0" y1="80" x2="500" y2="80" stroke="#3D2E24" strokeOpacity="0.1" strokeDasharray="4" />
               <line x1="0" y1="140" x2="500" y2="140" stroke="#3D2E24" strokeOpacity="0.1" strokeDasharray="4" />
 
-              <path
-                d={graphPoints.path}
-                fill="url(#incomeGradient)"
-                className="transition-all duration-700 ease-in-out"
-              />
-              <path
-                d={graphPoints.line}
-                fill="none"
-                stroke="#3D2E24"
-                strokeWidth="3.5"
-                className="transition-all duration-700 ease-in-out"
-              />
-              <circle cx="150" cy="85" r="5.5" fill="#3D2E24" className="transition-transform duration-300 hover:scale-[2] cursor-pointer origin-center" />
-              <circle cx="300" cy="45" r="5.5" fill="#BDD390" stroke="#3D2E24" strokeWidth="2.5" className="transition-transform duration-300 hover:scale-[2] cursor-pointer origin-center" />
-              <circle cx="450" cy="25" r="5.5" fill="#3D2E24" className="transition-transform duration-300 hover:scale-[2] cursor-pointer origin-center" />
+              <path d={graphPoints.path} fill="url(#incomeGradient)" />
+              <path d={graphPoints.line} fill="none" stroke="#3D2E24" strokeWidth="3.5" />
+              <circle cx="150" cy="85" r="5.5" fill="#3D2E24" className="cursor-pointer" />
+              <circle cx="300" cy="45" r="5.5" fill="#BDD390" stroke="#3D2E24" strokeWidth="2.5" className="cursor-pointer" />
+              <circle cx="450" cy="25" r="5.5" fill="#3D2E24" className="cursor-pointer" />
             </svg>
           </div>
 
@@ -282,8 +296,8 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Graph 2: Sales Category Breakdown */}
-        <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#3D2E24] group">
+        {/* Category Breakdown */}
+        <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#3D2E24]">
           <div>
             <div className="flex items-center justify-between mb-2">
               <div>
@@ -299,14 +313,8 @@ export default function AdminDashboard() {
             {categoryBreakdown.map((item, idx) => (
               <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group/bar">
                 <div className="w-full flex items-end justify-center gap-1 h-full">
-                  <div 
-                    style={{ height: `${item.bar1}%` }} 
-                    className="w-1/2 bg-[#3D2E24] rounded-t-lg transition-all duration-500 group-hover/bar:brightness-125 shadow-sm" 
-                  />
-                  <div 
-                    style={{ height: `${item.bar2}%` }} 
-                    className="w-1/2 bg-[#BDD390] rounded-t-lg border border-[#3D2E24]/20 transition-all duration-500 group-hover/bar:brightness-90 shadow-sm" 
-                  />
+                  <div style={{ height: `${item.bar1}%` }} className="w-1/2 bg-[#3D2E24] rounded-t-lg shadow-sm" />
+                  <div style={{ height: `${item.bar2}%` }} className="w-1/2 bg-[#BDD390] rounded-t-lg border border-[#3D2E24]/20 shadow-sm" />
                 </div>
                 <span className="text-[10px] font-black text-[#3D2E24] mt-1 text-center truncate w-full">{item.label}</span>
               </div>
@@ -331,14 +339,14 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {popularDishes.map((dish, i) => (
-            <div key={i} className="rounded-3xl bg-[#F3EDD8]/50 p-5 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-[#3D2E24] group">
+            <div key={i} className="rounded-3xl bg-[#F3EDD8]/50 p-5 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-[#3D2E24]">
               <div className="flex justify-between items-start mb-2">
                 <span className="text-[11px] font-bold bg-[#3D2E24] text-[#BDD390] px-2.5 py-1 rounded-full shadow-sm">
                   {dish.tag}
                 </span>
                 <span className="text-xs font-bold text-[#3D2E24]/60">{dish.orders}</span>
               </div>
-              <h3 className="text-base font-black text-[#3D2E24] mt-2 group-hover:text-emerald-900 transition-colors">{dish.name}</h3>
+              <h3 className="text-base font-black text-[#3D2E24] mt-2">{dish.name}</h3>
               <p className="text-xs text-[#3D2E24]/70">{dish.category}</p>
               <div className="mt-4 flex items-center justify-between pt-3 border-t border-[#BDD390]/40">
                 <span className="text-sm font-black text-[#3D2E24]">{dish.price}</span>
@@ -350,7 +358,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Orders Table Section */}
-      <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md transition-all duration-300 hover:shadow-xl">
+      <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
             <h2 className="text-lg font-black text-[#3D2E24]">Recent Customer Orders</h2>
