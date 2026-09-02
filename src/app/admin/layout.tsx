@@ -14,7 +14,8 @@ import {
   Coffee,
   Globe,
   Share2,
-  MessageCircle
+  MessageCircle,
+  Home
 } from "lucide-react";
 import { useState } from "react";
 
@@ -32,9 +33,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
-    // Clear admin auth session/token when backend is connected
     localStorage.removeItem("admin_auth");
-    router.push("/"); // Redirect directly to website homepage
+    router.push("/");
   };
 
   return (
@@ -57,16 +57,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="space-y-6">
             {/* Profile Box */}
             <div className="rounded-2xl bg-[#3D312B] p-4 text-[#F3EDD8] border border-[#BDD390]/20">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#BDD390] font-black text-[#2D231F]">
-                  CC
-                </div>
-                <div>
-                  <h2 className="text-sm font-bold text-white">Cozy Admin</h2>
-                  <p className="text-xs font-semibold text-[#BDD390]">Store Manager</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#BDD390] font-black text-[#2D231F]">
+                    CC
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-white">Cozy Admin</h2>
+                    <p className="text-xs font-semibold text-[#BDD390]">Store Manager</p>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Quick Navigation to Website Homepage */}
+            <Link
+              href="/"
+              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-xs font-bold bg-[#BDD390]/10 text-[#BDD390] border border-[#BDD390]/30 hover:bg-[#BDD390] hover:text-[#2D231F] transition-all"
+            >
+              <Home className="h-4 w-4" /> Go to Website Homepage
+            </Link>
 
             <nav className="space-y-2">
               {navItems.map((item) => {
