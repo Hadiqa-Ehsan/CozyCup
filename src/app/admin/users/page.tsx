@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Search, Shield, User, X } from "lucide-react";
+import { Users, Search, Shield, User, X, CheckCircle2 } from "lucide-react";
 
 const initialUsers = [
   { id: "u1", name: "Hadiqa Ehsan", email: "hadiqa@cozycup.com", role: "Admin", joined: "May 2026", status: "Active" },
@@ -55,28 +55,40 @@ export default function AdminUsersPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {filteredUsers.map((u) => (
-            <div key={u.id} className="p-5 rounded-3xl bg-white/50 border border-[#BDD390]/60 shadow-sm hover:bg-white/80 transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex justify-between items-start">
-                  <h4 className="text-sm font-black text-[#3D2E24] flex items-center gap-1.5">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-[#BDD390]/60">
+            <thead>
+              <tr>
+                <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Member Name</th>
+                <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Email Address</th>
+                <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Role</th>
+                <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Joined Date</th>
+                <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#BDD390]/30">
+              {filteredUsers.map((u) => (
+                <tr key={u.id} className="hover:bg-white/40 transition-colors">
+                  <td className="py-4 text-xs font-bold text-[#3D2E24] flex items-center gap-2">
                     {u.role === "Admin" ? <Shield className="h-4 w-4 text-emerald-800" /> : <User className="h-4 w-4 text-[#3D2E24]/60" />}
                     {u.name}
-                  </h4>
-                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${u.role === 'Admin' ? 'bg-[#3D2E24] text-[#BDD390]' : 'bg-[#BDD390] text-[#3D2E24]'}`}>
-                    {u.role}
-                  </span>
-                </div>
-                <p className="text-xs text-[#3D2E24]/70 mt-2">{u.email}</p>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-[#BDD390]/40 flex justify-between items-center text-[11px] text-[#3D2E24]/60">
-                <span>Joined: {u.joined}</span>
-                <span className="font-bold text-emerald-800 bg-[#BDD390]/50 px-2 py-0.5 rounded-lg">{u.status}</span>
-              </div>
-            </div>
-          ))}
+                  </td>
+                  <td className="py-4 text-xs font-medium text-[#3D2E24]/80">{u.email}</td>
+                  <td className="py-4 text-xs">
+                    <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${u.role === 'Admin' ? 'bg-[#3D2E24] text-[#BDD390]' : 'bg-[#BDD390] text-[#3D2E24]'}`}>
+                      {u.role}
+                    </span>
+                  </td>
+                  <td className="py-4 text-xs font-medium text-[#3D2E24]/70">{u.joined}</td>
+                  <td className="py-4 text-xs">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-200 text-emerald-900 border border-emerald-300">
+                      <CheckCircle2 className="h-3 w-3" /> {u.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
