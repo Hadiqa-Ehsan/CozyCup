@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   Package, 
@@ -28,7 +28,14 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = () => {
+    // Clear admin auth session/token when backend is connected
+    localStorage.removeItem("admin_auth");
+    router.push("/"); // Redirect directly to website homepage
+  };
 
   return (
     <div className="min-h-screen bg-[#F3EDD8] p-4 lg:p-6 text-[#2D231F] flex flex-col justify-between">
@@ -84,7 +91,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           <div className="pt-4 border-t border-white/10">
-            <button className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold text-rose-300 transition-all hover:bg-rose-500/20">
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold text-rose-300 transition-all hover:bg-rose-500/20"
+            >
               <LogOut className="h-5 w-5" />
               Log Out
             </button>
