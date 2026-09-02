@@ -54,7 +54,6 @@ const mockUsers = [
 
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSearchType, setSelectedSearchType] = useState<"all" | "order" | "product" | "user">("all");
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -83,7 +82,6 @@ export default function AdminDashboard() {
   const activeProductsCount = mockProducts.length;
   const totalUsersCount = mockUsers.length;
 
-  // Comprehensive Search results across Orders, Products, and Users
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return { matchedOrders: [], matchedProducts: [], matchedUsers: [] };
     const q = searchQuery.toLowerCase();
@@ -103,13 +101,26 @@ export default function AdminDashboard() {
     return { matchedOrders, matchedProducts, matchedUsers };
   }, [searchQuery, orders]);
 
-  const handleSelectSearchResult = (id: string) => {
+  // Handle smooth scroll jump and visual highlight effect
+  const handleSelectSearchResult = (id: string, type: "order" | "product" | "user") => {
     setHighlightedId(id);
-    setSearchQuery(""); // Clear search box dropdown popup
-    // Auto clear highlight after 3 seconds
+    setSearchQuery("");
+
+    let targetElementId = "";
+    if (type === "order") targetElementId = `order-${id}`;
+    else if (type === "product") targetElementId = `product-${id}`;
+    else if (type === "user") targetElementId = `user-${id}`;
+
+    setTimeout(() => {
+      const el = document.getElementById(targetElementId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
+
     setTimeout(() => {
       setHighlightedId(null);
-    }, 3000);
+    }, 3500);
   };
 
   const categoryBreakdown = useMemo(() => {
@@ -174,7 +185,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 text-[#3D2E24] font-sans pb-12 relative">
-      {/* Top Header with Interactive Search Box & Dropdown Results */}
+      {/* Top Header */}
       <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/80 p-6 backdrop-blur-[12px] border border-[#BDD390] shadow-md sm:flex-row sm:items-center sm:justify-between transition-all duration-300 relative z-30">
         <div>
           <h1 className="text-2xl font-black text-[#3D2E24]">Good evening, Hadiqa.</h1>
@@ -214,7 +225,7 @@ export default function AdminDashboard() {
                       {searchResults.matchedOrders.map(o => (
                         <div 
                           key={o.id}
-                          onClick={() => handleSelectSearchResult(o.id)}
+                          onClick={() => handleSelectSearchResult(o.id, "order")}
                           className="flex items-center justify-between p-2 rounded-xl hover:bg-[#BDD390]/40 cursor-pointer transition-colors text-xs"
                         >
                           <div>
@@ -227,7 +238,7 @@ export default function AdminDashboard() {
                       {searchResults.matchedProducts.map((p: any) => (
                         <div 
                           key={p.id}
-                          onClick={() => handleSelectSearchResult(p.id)}
+                          onClick={() => handleSelectSearchResult(p.id, "product")}
                           className="flex items-center justify-between p-2 rounded-xl hover:bg-[#BDD390]/40 cursor-pointer transition-colors text-xs"
                         >
                           <div>
@@ -239,7 +250,7 @@ export default function AdminDashboard() {
                       {searchResults.matchedUsers.map(u => (
                         <div 
                           key={u.id}
-                          onClick={() => handleSelectSearchResult(u.id)}
+                          onClick={() => handleSelectSearchResult(u.id, "user")}
                           className="flex items-center justify-between p-2 rounded-xl hover:bg-[#BDD390]/40 cursor-pointer transition-colors text-xs"
                         >
                           <div>
@@ -405,7 +416,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Popular Items Section with Highlight Support */}
+      {/* Popular Items Section with Unique DOM IDs for Smooth Scroll Jump */}
       <div className="space-y-4 relative z-10">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-[#3D2E24] flex items-center gap-2">
@@ -420,9 +431,10 @@ export default function AdminDashboard() {
             return (
               <div 
                 key={dish.id} 
+                id={`product-${dish.id}`}
                 className={`rounded-3xl p-5 backdrop-blur-[12px] border transition-all duration-500 shadow-md ${
                   isHighlighted 
-                    ? 'bg-amber-200/90 border-[#3D2E24] ring-4 ring-amber-400 scale-105 shadow-2xl' 
+                    ? 'bg-amber-300 border-[#3D2E24] ring-4 ring-amber-500 scale-105 shadow-2xl animate-pulse' 
                     : 'bg-[#F3EDD8]/50 border-[#BDD390]/60 hover:-translate-y-1.5 hover:shadow-xl hover:border-[#3D2E24]'
                 }`}
               >
@@ -432,7 +444,10 @@ export default function AdminDashboard() {
                   </span>
                   <span className="text-xs font-bold text-[#3D2E24]/60">{dish.orders}</span>
                 </div>
-                <h3 className="text-base font-black text-[#3D2E24] mt-2">{dish.name}</h3>
+                <h3 className="text-base font-black text-[#3D2E24] mt-2 flex items-center justify-between">
+                  {dish.name}
+                  {isHighlighted && <ExternalLink className="h-4 w-4 text-amber-900 animate-bounce" />}
+                </h3>
                 <p className="text-xs text-[#3D2E24]/70">{dish.category}</p>
                 <div className="mt-4 flex items-center justify-between pt-3 border-t border-[#BDD390]/40">
                   <span className="text-sm font-black text-[#3D2E24]">{dish.price}</span>
@@ -444,7 +459,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Recent Orders Section (Fully Interactive & Highlightable Rows) */}
+      {/* Recent Orders Section (With Unique DOM IDs for Scrolling & Highlighting) */}
       <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md relative z-10">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
@@ -492,9 +507,10 @@ export default function AdminDashboard() {
                 return (
                   <tr 
                     key={order.id} 
+                    id={`order-${order.id}`}
                     className={`transition-all duration-500 ${
                       isHighlighted 
-                        ? 'bg-amber-300/80 ring-2 ring-amber-500 shadow-inner font-bold' 
+                        ? 'bg-amber-300 ring-2 ring-amber-500 shadow-inner font-bold scale-[1.01] animate-pulse' 
                         : 'hover:bg-white/40'
                     }`}
                   >
@@ -511,6 +527,45 @@ export default function AdminDashboard() {
               })}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Registered Users Section (With Unique DOM IDs for User Jump & Highlight) */}
+      <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md relative z-10">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 className="text-lg font-black text-[#3D2E24]">Registered Members / Users</h2>
+            <p className="text-xs text-[#3D2E24]/60">Platform accounts and customer profiles</p>
+          </div>
+          <span className="text-xs font-bold bg-[#BDD390] px-3 py-1.5 rounded-xl text-[#3D2E24] shadow-sm">
+            {mockUsers.length} Users Listed
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {mockUsers.map((u) => {
+            const isHighlighted = highlightedId === u.id;
+            return (
+              <div 
+                key={u.id}
+                id={`user-${u.id}`}
+                className={`p-4 rounded-2xl border transition-all duration-500 ${
+                  isHighlighted 
+                    ? 'bg-amber-300 border-[#3D2E24] ring-4 ring-amber-500 shadow-xl scale-105 animate-pulse' 
+                    : 'bg-white/50 border-[#BDD390]/60 hover:bg-white/80'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <h4 className="text-xs font-black text-[#3D2E24] flex items-center gap-1">
+                    {u.name}
+                    {isHighlighted && <ExternalLink className="h-3 w-3 text-amber-900 animate-bounce" />}
+                  </h4>
+                  <span className="text-[10px] font-bold bg-[#BDD390] text-[#3D2E24] px-2 py-0.5 rounded-full">{u.role}</span>
+                </div>
+                <p className="text-[11px] text-[#3D2E24]/70 mt-1">{u.email}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
