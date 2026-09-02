@@ -40,10 +40,15 @@ function LoginForm() {
     handleSubmit,
     trigger,
     getValues,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(fullLoginSchema),
     mode: "onChange",
+    defaultValues: {
+      email: "hadiqa@cozycup.com",
+      password: "had12345",
+    },
   });
 
   async function handleNextStep() {
