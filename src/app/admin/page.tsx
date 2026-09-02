@@ -9,8 +9,6 @@ import {
   ArrowUp,
   Search,
   Bell,
-  Activity,
-  Crown,
   Coffee,
   Clock,
   CheckCircle2,
@@ -28,32 +26,32 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setRevenue(32134);
-      setOrdersCount(328);
-      setProductsCount(42);
+      setRevenue(184500);
+      setOrdersCount(24);
+      setProductsCount(63);
       setUsersCount(1240);
     }, 200);
     return () => clearTimeout(timer);
   }, []);
 
   const stats = [
-    { title: "Total Revenue", value: `PKR ${revenue.toLocaleString()}`, change: "+14.2%", icon: TrendingUp },
-    { title: "Coffee Orders", value: ordersCount.toLocaleString(), change: "+8.1%", icon: ShoppingBag },
-    { title: "Active Menu Items", value: productsCount.toLocaleString(), change: "+3.4%", icon: Package },
+    { title: "Total Revenue", value: `PKR ${revenue.toLocaleString()}`, change: "+8.4%", icon: TrendingUp },
+    { title: "Coffee Orders", value: ordersCount.toLocaleString(), change: "+4", icon: ShoppingBag },
+    { title: "Active Menu Items", value: productsCount.toLocaleString(), change: "+12%", icon: Package },
     { title: "Registered Members", value: usersCount.toLocaleString(), change: "+12.5%", icon: Users },
   ];
 
   const popularDishes = [
-    { name: "Caramel Macchiato", category: "Espresso & Coffee", price: "PKR 580", orders: "142 today", tag: "Top Seller" },
-    { name: "Classic Croissant", category: "Bakery & Pastry", price: "PKR 420", orders: "98 today", tag: "Chef Choice" },
-    { name: "Iced Vanilla Latte", category: "Cold Beverages", price: "PKR 650", orders: "115 today", tag: "Trending" },
+    { name: "Mango Milk Cake Special", category: "Bakery & Sweets", price: "PKR 1,250", orders: "42 today", tag: "Top Seller" },
+    { name: "Classic Chicken Burger", category: "Fast Food", price: "PKR 450", orders: "38 today", tag: "Chef Choice" },
+    { name: "Fresh Organic Milk", category: "Dairy & Deli", price: "PKR 996", orders: "25 today", tag: "Trending" },
   ];
 
   const recentOrders = [
-    { id: "#CC-2841", customer: "Hadiqa Ehsan", item: "2x Caramel Macchiato, 1x Croissant", total: "PKR 1,580", status: "Pending" },
-    { id: "#CC-2840", customer: "Bilal Ahmed", item: "1x Iced Vanilla Latte", total: "PKR 650", status: "Processing" },
-    { id: "#CC-2839", customer: "Sara Malik", item: "3x Espresso Shot, 2x Blueberry Muffin", total: "PKR 2,150", status: "Delivered" },
-    { id: "#CC-2838", customer: "Usman Ali", item: "1x Mocha Frappe", total: "PKR 720", status: "Delivered" },
+    { id: "ORD-9281", customer: "Hadiqa Ehsan", item: "Mango Milk Cake Special, Fresh Organic Milk", total: "PKR 2,246", status: "Delivered" },
+    { id: "ORD-9280", customer: "Ali Ahmed", item: "Special Noodle Bowl, Spring Rolls", total: "PKR 996", status: "Processing" },
+    { id: "ORD-9279", customer: "Sara Khan", item: "Chocolate Cake, Glazed Donut", total: "PKR 1,796", status: "Pending" },
+    { id: "ORD-9278", customer: "Usman Ali", item: "Classic Chicken Burger, French Fries", total: "PKR 796", status: "Delivered" },
   ];
 
   return (
@@ -61,7 +59,7 @@ export default function AdminDashboard() {
       {/* Top Header */}
       <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/80 p-6 backdrop-blur-[12px] border border-[#BDD390] shadow-md sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black text-[#3D2E24]">Good evening, Admin.</h1>
+          <h1 className="text-2xl font-black text-[#3D2E24]">Good evening, Hadiqa.</h1>
           <p className="text-sm font-medium text-[#3D2E24]/70">CozyCup Café Management & Analytics Hub</p>
         </div>
         <div className="flex items-center gap-3">
@@ -104,16 +102,16 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* TWO UNIQUE INTERACTIVE WORKING GRAPHS (Based on reference style 1 & 2) */}
+      {/* TWO UNIQUE INTERACTIVE WORKING GRAPHS */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         
-        {/* Graph 1: Smooth Income Trend Area/Line Chart (Reference Image Style) */}
+        {/* Graph 1: Smooth Income Trend Area/Line Chart */}
         <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
               <div>
                 <span className="text-xs font-bold text-[#3D2E24]/60 uppercase">Income Analytics</span>
-                <h2 className="text-xl font-black text-[#3D2E24]">PKR 32,134 <span className="text-xs font-bold text-emerald-700 bg-[#BDD390] px-2 py-0.5 rounded-full ml-2">↑ 2.5%</span></h2>
+                <h2 className="text-xl font-black text-[#3D2E24]">PKR 184,500 <span className="text-xs font-bold text-emerald-700 bg-[#BDD390] px-2 py-0.5 rounded-full ml-2">↑ 8.4%</span></h2>
               </div>
               <div className="flex bg-white/60 rounded-xl p-1 border border-[#BDD390]">
                 <button 
@@ -130,7 +128,7 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-            <p className="text-xs text-[#3D2E24]/60">Compared to PKR 21,340 last period</p>
+            <p className="text-xs text-[#3D2E24]/60">Compared to store sales baseline</p>
           </div>
 
           {/* SVG Smooth Curve Area Chart */}
@@ -142,12 +140,10 @@ export default function AdminDashboard() {
                   <stop offset="100%" stopColor="#BDD390" stopOpacity="0.05" />
                 </linearGradient>
               </defs>
-              {/* Background Grid lines */}
               <line x1="0" y1="20" x2="500" y2="20" stroke="#3D2E24" strokeOpacity="0.1" strokeDasharray="4" />
               <line x1="0" y1="80" x2="500" y2="80" stroke="#3D2E24" strokeOpacity="0.1" strokeDasharray="4" />
               <line x1="0" y1="140" x2="500" y2="140" stroke="#3D2E24" strokeOpacity="0.1" strokeDasharray="4" />
 
-              {/* Area fill */}
               <path
                 d={revenuePeriod === "weekly" 
                   ? "M 0 120 Q 80 40, 160 90 T 320 50 T 500 20 L 500 160 L 0 160 Z"
@@ -155,7 +151,6 @@ export default function AdminDashboard() {
                 }
                 fill="url(#incomeGradient)"
               />
-              {/* Main curve line */}
               <path
                 d={revenuePeriod === "weekly" 
                   ? "M 0 120 Q 80 40, 160 90 T 320 50 T 500 20"
@@ -165,7 +160,6 @@ export default function AdminDashboard() {
                 stroke="#3D2E24"
                 strokeWidth="3.5"
               />
-              {/* Interactive Data Points */}
               <circle cx="160" cy="90" r="5" fill="#3D2E24" className="transition-all hover:scale-150 cursor-pointer" />
               <circle cx="320" cy="50" r="5" fill="#BDD390" stroke="#3D2E24" strokeWidth="2" className="transition-all hover:scale-150 cursor-pointer" />
               <circle cx="500" cy="20" r="5" fill="#3D2E24" className="transition-all hover:scale-150 cursor-pointer" />
@@ -180,26 +174,25 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Graph 2: Multi-Metric Sales Breakdown Bar Report (Reference Image Style 2) */}
+        {/* Graph 2: Multi-Metric Sales Breakdown Bar Report */}
         <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
               <div>
                 <span className="text-xs font-bold text-[#3D2E24]/60 uppercase">Sales Category Breakdown</span>
-                <h2 className="text-xl font-black text-[#3D2E24]">Beverages vs Bakery</h2>
+                <h2 className="text-xl font-black text-[#3D2E24]">Bakery vs Fast Food</h2>
               </div>
               <span className="text-xs font-bold text-[#3D2E24] bg-[#BDD390] px-3 py-1 rounded-full shadow-sm">Live Report</span>
             </div>
             <p className="text-xs text-[#3D2E24]/60">Breakdown of daily item category performance</p>
           </div>
 
-          {/* Grouped Bar Chart Visual */}
           <div className="h-44 flex items-end justify-between gap-4 pt-8 px-4 my-4 border-b border-[#BDD390]/40 pb-2">
             {[
-              { label: "Espresso", bar1: 85, bar2: 60 },
-              { label: "Cold Brew", bar1: 65, bar2: 90 },
-              { label: "Pastries", bar1: 45, bar2: 70 },
-              { label: "Desserts", bar1: 95, bar2: 50 },
+              { label: "Bakery", bar1: 85, bar2: 60 },
+              { label: "Dairy", bar1: 65, bar2: 90 },
+              { label: "Sweets", bar1: 45, bar2: 70 },
+              { label: "Fast Food", bar1: 95, bar2: 50 },
             ].map((item, idx) => (
               <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
                 <div className="w-full flex items-end justify-center gap-1.5 h-full">
