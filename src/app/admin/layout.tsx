@@ -111,16 +111,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </aside>
 
-        {/* Main Content Area - Full height matching sidebar layout */}
+        {/* Main Content Area */}
         <main className="flex-1 rounded-3xl bg-white p-6 lg:p-8 text-[#2D231F] shadow-xl border border-[#BDD390]/50 overflow-y-auto">
           {children}
         </main>
       </div>
 
-      {/* Footer matching exact header brown */}
+      {/* Admin Dashboard Footer (Menu link removed, other working links kept) */}
       <footer className="mx-auto mt-8 w-full max-w-7xl rounded-3xl bg-[#2D231F] px-8 py-10 text-[#F3EDD8] shadow-xl">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-5">
-          <div className="md:col-span-2 space-y-4">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#BDD390] text-[#2D231F]">
                 <Coffee className="h-4 w-4" />
@@ -141,7 +141,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <h3 className="text-xs font-bold uppercase tracking-widest text-[#BDD390]">Explore</h3>
             <ul className="mt-4 space-y-2 text-xs font-medium text-[#F3EDD8]/80">
               <li><Link href="/" className="hover:text-white">Home</Link></li>
-              <li><Link href="/menu" className="hover:text-white">Menu</Link></li>
               <li><Link href="/admin" className="hover:text-white">My Dashboard</Link></li>
             </ul>
           </div>
