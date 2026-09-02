@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   ShoppingBag,
   Users,
@@ -13,8 +13,7 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  X,
-  ExternalLink
+  X
 } from "lucide-react";
 import { mockProducts, mockCategories } from "../../lib/mock-data";
 
@@ -54,8 +53,6 @@ const mockUsers = [
 
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [highlightedId, setHighlightedId] = useState<string | null>(null);
-
   const [showNotifications, setShowNotifications] = useState(false);
   const [revenuePeriod, setRevenuePeriod] = useState<"weekly" | "monthly">("weekly");
   const [orders, setOrders] = useState(initialOrders);
@@ -100,28 +97,6 @@ export default function AdminDashboard() {
 
     return { matchedOrders, matchedProducts, matchedUsers };
   }, [searchQuery, orders]);
-
-  // Handle smooth scroll jump and visual highlight effect
-  const handleSelectSearchResult = (id: string, type: "order" | "product" | "user") => {
-    setHighlightedId(id);
-    setSearchQuery("");
-
-    let targetElementId = "";
-    if (type === "order") targetElementId = `order-${id}`;
-    else if (type === "product") targetElementId = `product-${id}`;
-    else if (type === "user") targetElementId = `user-${id}`;
-
-    setTimeout(() => {
-      const el = document.getElementById(targetElementId);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }, 100);
-
-    setTimeout(() => {
-      setHighlightedId(null);
-    }, 3500);
-  };
 
   const categoryBreakdown = useMemo(() => {
     const categoryMap: { [key: string]: number } = {};
@@ -198,7 +173,7 @@ export default function AdminDashboard() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search orders, products, users..."
+              placeholder="Search orders, products..."
               className="rounded-2xl border border-[#BDD390] bg-white/70 py-2.5 pl-10 pr-8 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 backdrop-blur-md shadow-sm transition-all w-72"
             />
             {searchQuery && (
@@ -210,24 +185,20 @@ export default function AdminDashboard() {
               </button>
             )}
 
-            {/* Live Search Instant Popup Results Dropdown */}
+            {/* Live Search Popup Dropdown (Without Navigation/Action) */}
             {searchQuery.trim().length > 0 && (
               <div className="absolute left-0 right-0 mt-2 rounded-2xl bg-[#F3EDD8] border border-[#BDD390] shadow-2xl z-[9999] overflow-hidden backdrop-blur-xl">
                 <div className="p-2 border-b border-[#BDD390] bg-white/40 flex items-center justify-between text-[10px] font-bold uppercase text-[#3D2E24]/70 px-3">
-                  <span>Quick Navigation Matches</span>
-                  <span>Click to jump</span>
+                  <span>Search Results</span>
+                  <span>Suggestions</span>
                 </div>
                 <div className="max-h-64 overflow-y-auto p-1 space-y-1">
                   {searchResults.matchedOrders.length === 0 && searchResults.matchedProducts.length === 0 && searchResults.matchedUsers.length === 0 ? (
-                    <div className="p-3 text-center text-xs text-[#3D2E24]/60">No exact matches found</div>
+                    <div className="p-3 text-center text-xs text-[#3D2E24]/60">No matches found</div>
                   ) : (
                     <>
                       {searchResults.matchedOrders.map(o => (
-                        <div 
-                          key={o.id}
-                          onClick={() => handleSelectSearchResult(o.id, "order")}
-                          className="flex items-center justify-between p-2 rounded-xl hover:bg-[#BDD390]/40 cursor-pointer transition-colors text-xs"
-                        >
+                        <div key={o.id} className="flex items-center justify-between p-2 rounded-xl bg-white/30 text-xs">
                           <div>
                             <span className="font-black text-[#3D2E24]">{o.id}</span>
                             <span className="text-[#3D2E24]/70 ml-2">({o.customerName})</span>
@@ -236,11 +207,7 @@ export default function AdminDashboard() {
                         </div>
                       ))}
                       {searchResults.matchedProducts.map((p: any) => (
-                        <div 
-                          key={p.id}
-                          onClick={() => handleSelectSearchResult(p.id, "product")}
-                          className="flex items-center justify-between p-2 rounded-xl hover:bg-[#BDD390]/40 cursor-pointer transition-colors text-xs"
-                        >
+                        <div key={p.id} className="flex items-center justify-between p-2 rounded-xl bg-white/30 text-xs">
                           <div>
                             <span className="font-black text-[#3D2E24]">{p.name}</span>
                           </div>
@@ -248,11 +215,7 @@ export default function AdminDashboard() {
                         </div>
                       ))}
                       {searchResults.matchedUsers.map(u => (
-                        <div 
-                          key={u.id}
-                          onClick={() => handleSelectSearchResult(u.id, "user")}
-                          className="flex items-center justify-between p-2 rounded-xl hover:bg-[#BDD390]/40 cursor-pointer transition-colors text-xs"
-                        >
+                        <div key={u.id} className="flex items-center justify-between p-2 rounded-xl bg-white/30 text-xs">
                           <div>
                             <span className="font-black text-[#3D2E24]">{u.name}</span>
                             <span className="text-[#3D2E24]/60 ml-2 text-[10px]">{u.role}</span>
@@ -416,7 +379,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Popular Items Section with Unique DOM IDs for Smooth Scroll Jump */}
+      {/* Popular Items Section */}
       <div className="space-y-4 relative z-10">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-[#3D2E24] flex items-center gap-2">
@@ -426,40 +389,29 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {popularDishes.map((dish) => {
-            const isHighlighted = highlightedId === dish.id;
-            return (
-              <div 
-                key={dish.id} 
-                id={`product-${dish.id}`}
-                className={`rounded-3xl p-5 backdrop-blur-[12px] border transition-all duration-500 shadow-md ${
-                  isHighlighted 
-                    ? 'bg-amber-300 border-[#3D2E24] ring-4 ring-amber-500 scale-105 shadow-2xl animate-pulse' 
-                    : 'bg-[#F3EDD8]/50 border-[#BDD390]/60 hover:-translate-y-1.5 hover:shadow-xl hover:border-[#3D2E24]'
-                }`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[11px] font-bold bg-[#3D2E24] text-[#BDD390] px-2.5 py-1 rounded-full shadow-sm">
-                    {dish.tag}
-                  </span>
-                  <span className="text-xs font-bold text-[#3D2E24]/60">{dish.orders}</span>
-                </div>
-                <h3 className="text-base font-black text-[#3D2E24] mt-2 flex items-center justify-between">
-                  {dish.name}
-                  {isHighlighted && <ExternalLink className="h-4 w-4 text-amber-900 animate-bounce" />}
-                </h3>
-                <p className="text-xs text-[#3D2E24]/70">{dish.category}</p>
-                <div className="mt-4 flex items-center justify-between pt-3 border-t border-[#BDD390]/40">
-                  <span className="text-sm font-black text-[#3D2E24]">{dish.price}</span>
-                  <span className="text-xs font-bold text-emerald-800 bg-[#BDD390]/60 px-2.5 py-1 rounded-xl">Available</span>
-                </div>
+          {popularDishes.map((dish) => (
+            <div 
+              key={dish.id} 
+              className="rounded-3xl p-5 backdrop-blur-[12px] border bg-[#F3EDD8]/50 border-[#BDD390]/60 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-[#3D2E24]"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[11px] font-bold bg-[#3D2E24] text-[#BDD390] px-2.5 py-1 rounded-full shadow-sm">
+                  {dish.tag}
+                </span>
+                <span className="text-xs font-bold text-[#3D2E24]/60">{dish.orders}</span>
               </div>
-            );
-          })}
+              <h3 className="text-base font-black text-[#3D2E24] mt-2">{dish.name}</h3>
+              <p className="text-xs text-[#3D2E24]/70">{dish.category}</p>
+              <div className="mt-4 flex items-center justify-between pt-3 border-t border-[#BDD390]/40">
+                <span className="text-sm font-black text-[#3D2E24]">{dish.price}</span>
+                <span className="text-xs font-bold text-emerald-800 bg-[#BDD390]/60 px-2.5 py-1 rounded-xl">Available</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Recent Orders Section (With Unique DOM IDs for Scrolling & Highlighting) */}
+      {/* Recent Orders Section */}
       <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md relative z-10">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
@@ -486,7 +438,6 @@ export default function AdminDashboard() {
               {orders.map((order) => {
                 const orderTotal = order.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
                 const itemsSummary = order.items.map(i => `${i.quantity}x ${i.name}`).join(", ");
-                const isHighlighted = highlightedId === order.id;
                 
                 const statusBadge = 
                   order.status === "Pending" ? (
@@ -505,19 +456,8 @@ export default function AdminDashboard() {
                   );
 
                 return (
-                  <tr 
-                    key={order.id} 
-                    id={`order-${order.id}`}
-                    className={`transition-all duration-500 ${
-                      isHighlighted 
-                        ? 'bg-amber-300 ring-2 ring-amber-500 shadow-inner font-bold scale-[1.01] animate-pulse' 
-                        : 'hover:bg-white/40'
-                    }`}
-                  >
-                    <td className="py-4 text-xs font-bold text-[#3D2E24] flex items-center gap-1.5">
-                      {order.id}
-                      {isHighlighted && <ExternalLink className="h-3 w-3 text-amber-900 animate-bounce" />}
-                    </td>
+                  <tr key={order.id} className="transition-colors hover:bg-white/40">
+                    <td className="py-4 text-xs font-bold text-[#3D2E24]">{order.id}</td>
                     <td className="py-4 text-xs font-medium text-[#3D2E24]">{order.customerName}</td>
                     <td className="py-4 text-xs font-medium text-[#3D2E24]/80 max-w-xs truncate">{itemsSummary}</td>
                     <td className="py-4 text-xs font-bold text-[#3D2E24]">PKR {orderTotal.toLocaleString()}</td>
@@ -527,45 +467,6 @@ export default function AdminDashboard() {
               })}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Registered Users Section (With Unique DOM IDs for User Jump & Highlight) */}
-      <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md relative z-10">
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-          <div>
-            <h2 className="text-lg font-black text-[#3D2E24]">Registered Members / Users</h2>
-            <p className="text-xs text-[#3D2E24]/60">Platform accounts and customer profiles</p>
-          </div>
-          <span className="text-xs font-bold bg-[#BDD390] px-3 py-1.5 rounded-xl text-[#3D2E24] shadow-sm">
-            {mockUsers.length} Users Listed
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {mockUsers.map((u) => {
-            const isHighlighted = highlightedId === u.id;
-            return (
-              <div 
-                key={u.id}
-                id={`user-${u.id}`}
-                className={`p-4 rounded-2xl border transition-all duration-500 ${
-                  isHighlighted 
-                    ? 'bg-amber-300 border-[#3D2E24] ring-4 ring-amber-500 shadow-xl scale-105 animate-pulse' 
-                    : 'bg-white/50 border-[#BDD390]/60 hover:bg-white/80'
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <h4 className="text-xs font-black text-[#3D2E24] flex items-center gap-1">
-                    {u.name}
-                    {isHighlighted && <ExternalLink className="h-3 w-3 text-amber-900 animate-bounce" />}
-                  </h4>
-                  <span className="text-[10px] font-bold bg-[#BDD390] text-[#3D2E24] px-2 py-0.5 rounded-full">{u.role}</span>
-                </div>
-                <p className="text-[11px] text-[#3D2E24]/70 mt-1">{u.email}</p>
-              </div>
-            );
-          })}
         </div>
       </div>
     </div>
