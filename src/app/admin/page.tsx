@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ShoppingBag,
   Users,
@@ -12,69 +12,183 @@ import {
   Coffee,
   Clock,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  X
 } from "lucide-react";
+import { products, categories, mockOrders, mockUsers } from "@/data/mock-data";
 
 export default function AdminDashboard() {
-  const [revenue, setRevenue] = useState(0);
-  const [ordersCount, setOrdersCount] = useState(0);
-  const [productsCount, setProductsCount] = useState(0);
-  const [usersCount, setUsersCount] = useState(0);
-
-  // Interactive state for graph period toggles (live working feel)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showNotifications, setShowNotifications] = useState(false);
   const [revenuePeriod, setRevenuePeriod] = useState<"weekly" | "monthly">("weekly");
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setRevenue(184500);
-      setOrdersCount(24);
-      setProductsCount(63);
-      setUsersCount(1240);
-    }, 200);
-    return () => clearTimeout(timer);
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: "New Order Placed", desc: "Hadiqa Ehsan placed a new store order", time: "2m ago", read: false },
+    { id: 2, title: "Low Stock Alert", desc: "Select bakery inventory is running below threshold", time: "15m ago", read: false },
+    { id: 3, title: "System Sync", desc: "Database successfully synced with CozyCup backend", time: "1h ago", read: true },
+  ]);
+
+  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+
+  const markAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  };
+
+  const totalRevenue = useMemo(() => {
+    return mockOrders.reduce((acc, order) => {
+      return acc + order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }, 0);
   }, []);
 
+  const totalOrdersCount = mockOrders.length;
+  const activeProductsCount = products.length;
+  const totalUsersCount = mockUsers.length;
+
+  const filteredOrders = useMemo(() => {
+    if (!searchQuery.trim()) return mockOrders;
+    const q = searchQuery.toLowerCase();
+    return mockOrders.filter(
+      (o) =>
+        o.id.toLowerCase().includes(q) ||
+        o.customerName.toLowerCase().includes(q) ||
+        o.items.some(i => i.name.toLowerCase().includes(q))
+    );
+  }, [searchQuery]);
+
+  const categoryBreakdown = useMemo(() => {
+    const categoryMap: { [key: string]: number } = {};
+    mockOrders.forEach(order => {
+      order.items.forEach(item => {
+        const product = products.find(p => p.id === item.productId);
+        const catName = product ? product.category : "Other";
+        categoryMap[catName] = (categoryMap[catName] || 0) + (item.price * item.quantity);
+      });
+    });
+
+    const entries = Object.entries(categoryMap);
+    const totalSales = entries.reduce((sum, [, val]) => sum + val, 1);
+
+    return categories.map((cat, idx) => {
+      const sales = categoryMap[cat.name] || (idx === 0 ? 12000 : 5000);
+      const percentage = Math.round((sales / totalSales) * 100);
+      return {
+        label: cat.name,
+        bar1: Math.min(95, Math.max(30, percentage * 2)),
+        bar2: Math.min(90, Math.max(25, percentage * 1.5)),
+      };
+    });
+  }, []);
+
+  const popularDishes = useMemo(() => {
+    const productSalesCount: { [key: string]: number } = {};
+    mockOrders.forEach(order => {
+      order.items.forEach(item => {
+        productSalesCount[item.productId] = (productSalesCount[item.productId] || 0) + item.quantity;
+      });
+    });
+
+    const sortedProducts = [...products].sort((a, b) => {
+      const countA = productSalesCount[a.id] || 0;
+      const countB = productSalesCount[b.id] || 0;
+      return countB - countA;
+    });
+
+    return sortedProducts.slice(0, 3).map((p, idx) => ({
+      name: p.name,
+      category: p.category,
+      price: `PKR ${p.price.toLocaleString()}`,
+      orders: `${(productSalesCount[p.id] || 5) + 12} ordered`,
+      tag: idx === 0 ? "Top Seller" : idx === 1 ? "Chef Choice" : "Trending"
+    }));
+  }, []);
+
+  const graphPoints = useMemo(() => {
+    if (revenuePeriod === "weekly") {
+      return {
+        path: "M 0 125 Q 75 35, 150 85 T 300 45 T 450 25 T 500 15 L 500 160 L 0 160 Z",
+        line: "M 0 125 Q 75 35, 150 85 T 300 45 T 450 25 T 500 15",
+        values: ["Mon", "Wed", "Fri", "Sun"]
+      };
+    } else {
+      return {
+        path: "M 0 110 Q 125 15, 250 70 T 375 30 T 500 50 L 500 160 L 0 160 Z",
+        line: "M 0 110 Q 125 15, 250 70 T 375 30 T 500 50",
+        values: ["Week 1", "Week 2", "Week 3", "Week 4"]
+      };
+    }
+  }, [revenuePeriod]);
+
   const stats = [
-    { title: "Total Revenue", value: `PKR ${revenue.toLocaleString()}`, change: "+8.4%", icon: TrendingUp },
-    { title: "Coffee Orders", value: ordersCount.toLocaleString(), change: "+4", icon: ShoppingBag },
-    { title: "Active Menu Items", value: productsCount.toLocaleString(), change: "+12%", icon: Package },
-    { title: "Registered Members", value: usersCount.toLocaleString(), change: "+12.5%", icon: Users },
-  ];
-
-  const popularDishes = [
-    { name: "Mango Milk Cake Special", category: "Bakery & Sweets", price: "PKR 1,250", orders: "42 today", tag: "Top Seller" },
-    { name: "Classic Chicken Burger", category: "Fast Food", price: "PKR 450", orders: "38 today", tag: "Chef Choice" },
-    { name: "Fresh Organic Milk", category: "Dairy & Deli", price: "PKR 996", orders: "25 today", tag: "Trending" },
-  ];
-
-  const recentOrders = [
-    { id: "ORD-9281", customer: "Hadiqa Ehsan", item: "Mango Milk Cake Special, Fresh Organic Milk", total: "PKR 2,246", status: "Delivered" },
-    { id: "ORD-9280", customer: "Ali Ahmed", item: "Special Noodle Bowl, Spring Rolls", total: "PKR 996", status: "Processing" },
-    { id: "ORD-9279", customer: "Sara Khan", item: "Chocolate Cake, Glazed Donut", total: "PKR 1,796", status: "Pending" },
-    { id: "ORD-9278", customer: "Usman Ali", item: "Classic Chicken Burger, French Fries", total: "PKR 796", status: "Delivered" },
+    { title: "Total Revenue", value: `PKR ${totalRevenue.toLocaleString()}`, change: "+14.2%", icon: TrendingUp },
+    { title: "Total Orders", value: totalOrdersCount.toLocaleString(), change: "+8.1%", icon: ShoppingBag },
+    { title: "Active Menu Items", value: activeProductsCount.toLocaleString(), change: "+3.4%", icon: Package },
+    { title: "Registered Members", value: totalUsersCount.toLocaleString(), change: "+12.5%", icon: Users },
   ];
 
   return (
-    <div className="space-y-8 text-[#3D2E24] font-sans pb-12">
+    <div className="space-y-8 text-[#3D2E24] font-sans pb-12 relative">
       {/* Top Header */}
-      <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/80 p-6 backdrop-blur-[12px] border border-[#BDD390] shadow-md sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/80 p-6 backdrop-blur-[12px] border border-[#BDD390] shadow-md sm:flex-row sm:items-center sm:justify-between transition-all duration-300">
         <div>
           <h1 className="text-2xl font-black text-[#3D2E24]">Good evening, Hadiqa.</h1>
           <p className="text-sm font-medium text-[#3D2E24]/70">CozyCup Café Management & Analytics Hub</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 relative">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3D2E24]/50" />
             <input
               type="search"
-              placeholder="Search orders, menu..."
-              className="rounded-2xl border border-[#BDD390] bg-white/60 py-2.5 pl-10 pr-4 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none backdrop-blur-md shadow-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search orders, products..."
+              className="rounded-2xl border border-[#BDD390] bg-white/60 py-2.5 pl-10 pr-4 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 backdrop-blur-md shadow-sm transition-all"
             />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-[#3D2E24]/10 rounded-full p-1 hover:bg-[#3D2E24]/20"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
           </div>
-          <button className="relative rounded-2xl bg-white/80 p-3 text-[#3D2E24] border border-[#BDD390] hover:bg-[#3D2E24] hover:text-white shadow-sm transition-all">
-            <Bell className="h-4 w-4" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[#BDD390] animate-pulse" />
-          </button>
+
+          <div className="relative">
+            <button 
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative rounded-2xl bg-white/80 p-3 text-[#3D2E24] border border-[#BDD390] hover:bg-[#3D2E24] hover:text-white shadow-sm transition-all hover:scale-105"
+            >
+              <Bell className="h-4 w-4" />
+              {unreadNotificationsCount > 0 && (
+                <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse border border-white" />
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="absolute right-0 mt-3 w-80 rounded-3xl bg-[#F3EDD8] p-4 border border-[#BDD390] shadow-2xl z-50 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex items-center justify-between pb-3 border-b border-[#BDD390]">
+                  <span className="text-xs font-black uppercase tracking-wider text-[#3D2E24]">Notifications</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={markAllAsRead} className="text-[10px] font-bold text-[#3D2E24]/70 hover:underline">Mark read</button>
+                    <button onClick={() => setShowNotifications(false)} className="text-[#3D2E24] hover:bg-[#BDD390]/50 p-1 rounded-full">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-2 max-h-64 overflow-y-auto pr-1">
+                  {notifications.map((n) => (
+                    <div key={n.id} className={`p-3 rounded-2xl transition-all border ${n.read ? 'bg-white/40 border-transparent' : 'bg-white/90 border-[#BDD390] shadow-sm'}`}>
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-xs font-black text-[#3D2E24]">{n.title}</h4>
+                        <span className="text-[10px] text-[#3D2E24]/60">{n.time}</span>
+                      </div>
+                      <p className="text-[11px] text-[#3D2E24]/80 mt-1">{n.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -102,16 +216,15 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* TWO UNIQUE INTERACTIVE WORKING GRAPHS */}
+      {/* Graphs Section */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        
-        {/* Graph 1: Smooth Income Trend Area/Line Chart */}
-        <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between">
+        {/* Graph 1: Income Analytics */}
+        <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#3D2E24] group">
           <div>
             <div className="flex items-center justify-between mb-2">
               <div>
                 <span className="text-xs font-bold text-[#3D2E24]/60 uppercase">Income Analytics</span>
-                <h2 className="text-xl font-black text-[#3D2E24]">PKR 184,500 <span className="text-xs font-bold text-emerald-700 bg-[#BDD390] px-2 py-0.5 rounded-full ml-2">↑ 8.4%</span></h2>
+                <h2 className="text-xl font-black text-[#3D2E24]">PKR {totalRevenue.toLocaleString()} <span className="text-xs font-bold text-emerald-700 bg-[#BDD390] px-2 py-0.5 rounded-full ml-2">↑ 14.2%</span></h2>
               </div>
               <div className="flex bg-white/60 rounded-xl p-1 border border-[#BDD390]">
                 <button 
@@ -128,15 +241,14 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-            <p className="text-xs text-[#3D2E24]/60">Compared to store sales baseline</p>
+            <p className="text-xs text-[#3D2E24]/60">Revenue trend based on mock order data</p>
           </div>
 
-          {/* SVG Smooth Curve Area Chart */}
           <div className="my-6 relative h-40 w-full">
             <svg className="w-full h-full overflow-visible" viewBox="0 0 500 160">
               <defs>
                 <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#BDD390" stopOpacity="0.8" />
+                  <stop offset="0%" stopColor="#BDD390" stopOpacity="0.85" />
                   <stop offset="100%" stopColor="#BDD390" stopOpacity="0.05" />
                 </linearGradient>
               </defs>
@@ -145,67 +257,58 @@ export default function AdminDashboard() {
               <line x1="0" y1="140" x2="500" y2="140" stroke="#3D2E24" strokeOpacity="0.1" strokeDasharray="4" />
 
               <path
-                d={revenuePeriod === "weekly" 
-                  ? "M 0 120 Q 80 40, 160 90 T 320 50 T 500 20 L 500 160 L 0 160 Z"
-                  : "M 0 100 Q 100 20, 200 80 T 400 30 T 500 60 L 500 160 L 0 160 Z"
-                }
+                d={graphPoints.path}
                 fill="url(#incomeGradient)"
+                className="transition-all duration-700 ease-in-out"
               />
               <path
-                d={revenuePeriod === "weekly" 
-                  ? "M 0 120 Q 80 40, 160 90 T 320 50 T 500 20"
-                  : "M 0 100 Q 100 20, 200 80 T 400 30 T 500 60"
-                }
+                d={graphPoints.line}
                 fill="none"
                 stroke="#3D2E24"
                 strokeWidth="3.5"
+                className="transition-all duration-700 ease-in-out"
               />
-              <circle cx="160" cy="90" r="5" fill="#3D2E24" className="transition-all hover:scale-150 cursor-pointer" />
-              <circle cx="320" cy="50" r="5" fill="#BDD390" stroke="#3D2E24" strokeWidth="2" className="transition-all hover:scale-150 cursor-pointer" />
-              <circle cx="500" cy="20" r="5" fill="#3D2E24" className="transition-all hover:scale-150 cursor-pointer" />
+              <circle cx="150" cy="85" r="5.5" fill="#3D2E24" className="transition-transform duration-300 hover:scale-[2] cursor-pointer origin-center" />
+              <circle cx="300" cy="45" r="5.5" fill="#BDD390" stroke="#3D2E24" strokeWidth="2.5" className="transition-transform duration-300 hover:scale-[2] cursor-pointer origin-center" />
+              <circle cx="450" cy="25" r="5.5" fill="#3D2E24" className="transition-transform duration-300 hover:scale-[2] cursor-pointer origin-center" />
             </svg>
           </div>
 
           <div className="flex justify-between text-xs font-bold text-[#3D2E24]/70 pt-2 border-t border-[#BDD390]/40">
-            <span>Mon</span>
-            <span>Wed</span>
-            <span>Fri</span>
-            <span>Sun</span>
+            <span>{graphPoints.values[0]}</span>
+            <span>{graphPoints.values[1]}</span>
+            <span>{graphPoints.values[2]}</span>
+            <span>{graphPoints.values[3]}</span>
           </div>
         </div>
 
-        {/* Graph 2: Multi-Metric Sales Breakdown Bar Report */}
-        <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between">
+        {/* Graph 2: Sales Category Breakdown */}
+        <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#3D2E24] group">
           <div>
             <div className="flex items-center justify-between mb-2">
               <div>
                 <span className="text-xs font-bold text-[#3D2E24]/60 uppercase">Sales Category Breakdown</span>
-                <h2 className="text-xl font-black text-[#3D2E24]">Bakery vs Fast Food</h2>
+                <h2 className="text-xl font-black text-[#3D2E24]">Category Share</h2>
               </div>
               <span className="text-xs font-bold text-[#3D2E24] bg-[#BDD390] px-3 py-1 rounded-full shadow-sm">Live Report</span>
             </div>
-            <p className="text-xs text-[#3D2E24]/60">Breakdown of daily item category performance</p>
+            <p className="text-xs text-[#3D2E24]/60">Comparative performance by store categories</p>
           </div>
 
-          <div className="h-44 flex items-end justify-between gap-4 pt-8 px-4 my-4 border-b border-[#BDD390]/40 pb-2">
-            {[
-              { label: "Bakery", bar1: 85, bar2: 60 },
-              { label: "Dairy", bar1: 65, bar2: 90 },
-              { label: "Sweets", bar1: 45, bar2: 70 },
-              { label: "Fast Food", bar1: 95, bar2: 50 },
-            ].map((item, idx) => (
-              <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                <div className="w-full flex items-end justify-center gap-1.5 h-full">
+          <div className="h-44 flex items-end justify-between gap-3 pt-8 px-2 my-4 border-b border-[#BDD390]/40 pb-2">
+            {categoryBreakdown.map((item, idx) => (
+              <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group/bar">
+                <div className="w-full flex items-end justify-center gap-1 h-full">
                   <div 
                     style={{ height: `${item.bar1}%` }} 
-                    className="w-1/2 bg-[#3D2E24] rounded-t-lg transition-all duration-300 group-hover:brightness-125" 
+                    className="w-1/2 bg-[#3D2E24] rounded-t-lg transition-all duration-500 group-hover/bar:brightness-125 shadow-sm" 
                   />
                   <div 
                     style={{ height: `${item.bar2}%` }} 
-                    className="w-1/2 bg-[#BDD390] rounded-t-lg border border-[#3D2E24]/20 transition-all duration-300 group-hover:brightness-90" 
+                    className="w-1/2 bg-[#BDD390] rounded-t-lg border border-[#3D2E24]/20 transition-all duration-500 group-hover/bar:brightness-90 shadow-sm" 
                   />
                 </div>
-                <span className="text-[11px] font-bold text-[#3D2E24] mt-1">{item.label}</span>
+                <span className="text-[10px] font-black text-[#3D2E24] mt-1 text-center truncate w-full">{item.label}</span>
               </div>
             ))}
           </div>
@@ -215,28 +318,27 @@ export default function AdminDashboard() {
             <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#BDD390]" /> Delivery App</span>
           </div>
         </div>
-
       </div>
 
-      {/* POPULAR DISHES & MENU HIGHLIGHTS SECTION */}
+      {/* Popular Items Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-[#3D2E24] flex items-center gap-2">
             <Coffee className="h-5 w-5 text-[#3D2E24]" /> Popular CozyCup Items
           </h2>
-          <span className="text-xs font-bold text-[#3D2E24] bg-[#BDD390] px-3 py-1 rounded-full">Top Ranked Today</span>
+          <span className="text-xs font-bold text-[#3D2E24] bg-[#BDD390] px-3 py-1 rounded-full shadow-sm">Top Ranked Today</span>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {popularDishes.map((dish, i) => (
-            <div key={i} className="rounded-3xl bg-[#F3EDD8]/50 p-5 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md transition-all hover:-translate-y-1 hover:border-[#3D2E24]">
+            <div key={i} className="rounded-3xl bg-[#F3EDD8]/50 p-5 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-[#3D2E24] group">
               <div className="flex justify-between items-start mb-2">
-                <span className="text-[11px] font-bold bg-[#3D2E24] text-[#BDD390] px-2.5 py-1 rounded-full">
+                <span className="text-[11px] font-bold bg-[#3D2E24] text-[#BDD390] px-2.5 py-1 rounded-full shadow-sm">
                   {dish.tag}
                 </span>
                 <span className="text-xs font-bold text-[#3D2E24]/60">{dish.orders}</span>
               </div>
-              <h3 className="text-base font-black text-[#3D2E24] mt-2">{dish.name}</h3>
+              <h3 className="text-base font-black text-[#3D2E24] mt-2 group-hover:text-emerald-900 transition-colors">{dish.name}</h3>
               <p className="text-xs text-[#3D2E24]/70">{dish.category}</p>
               <div className="mt-4 flex items-center justify-between pt-3 border-t border-[#BDD390]/40">
                 <span className="text-sm font-black text-[#3D2E24]">{dish.price}</span>
@@ -247,14 +349,16 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* RECENT ORDERS TABLE SECTION */}
-      <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md">
-        <div className="flex items-center justify-between mb-4">
+      {/* Recent Orders Table Section */}
+      <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md transition-all duration-300 hover:shadow-xl">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
             <h2 className="text-lg font-black text-[#3D2E24]">Recent Customer Orders</h2>
-            <p className="text-xs text-[#3D2E24]/60">Live orders coming from CozyCup POS & web app</p>
+            <p className="text-xs text-[#3D2E24]/60">Live orders fetched directly from mock data</p>
           </div>
-          <button className="text-xs font-bold text-[#3D2E24] bg-[#BDD390] px-4 py-2 rounded-xl hover:brightness-105 shadow-sm">View All Orders</button>
+          <span className="text-xs font-bold bg-[#BDD390] px-3 py-1.5 rounded-xl text-[#3D2E24] shadow-sm">
+            {filteredOrders.length} Orders Listed
+          </span>
         </div>
 
         <div className="overflow-x-auto">
@@ -269,33 +373,44 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#BDD390]/30">
-              {recentOrders.map((order) => {
-                const statusBadge = 
-                  order.status === "Pending" ? (
-                    <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-amber-200 text-amber-900 border border-amber-300 animate-pulse">
-                      <Clock className="h-3 w-3" /> Pending
-                    </span>
-                  ) :
-                  order.status === "Processing" ? (
-                    <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-blue-200 text-blue-900 border border-blue-300">
-                      <AlertCircle className="h-3 w-3" /> Processing
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-emerald-200 text-emerald-900 border border-emerald-300">
-                      <CheckCircle2 className="h-3 w-3" /> Delivered
-                    </span>
-                  );
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-xs text-[#3D2E24]/60 font-medium">
+                    No matching orders found for your search query.
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map((order) => {
+                  const orderTotal = order.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+                  const itemsSummary = order.items.map(i => `${i.quantity}x ${i.name}`).join(", ");
+                  
+                  const statusBadge = 
+                    order.status === "Pending" ? (
+                      <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-amber-200 text-amber-900 border border-amber-300 animate-pulse">
+                        <Clock className="h-3 w-3" /> Pending
+                      </span>
+                    ) :
+                    order.status === "Processing" ? (
+                      <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-blue-200 text-blue-900 border border-blue-300">
+                        <AlertCircle className="h-3 w-3" /> Processing
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-emerald-200 text-emerald-900 border border-emerald-300">
+                        <CheckCircle2 className="h-3 w-3" /> Delivered
+                      </span>
+                    );
 
-                return (
-                  <tr key={order.id} className="transition-colors hover:bg-white/40">
-                    <td className="py-4 text-xs font-bold text-[#3D2E24]">{order.id}</td>
-                    <td className="py-4 text-xs font-medium text-[#3D2E24]">{order.customer}</td>
-                    <td className="py-4 text-xs font-medium text-[#3D2E24]/80">{order.item}</td>
-                    <td className="py-4 text-xs font-bold text-[#3D2E24]">{order.total}</td>
-                    <td className="py-4 text-xs">{statusBadge}</td>
-                  </tr>
-                );
-              })}
+                  return (
+                    <tr key={order.id} className="transition-colors hover:bg-white/40">
+                      <td className="py-4 text-xs font-bold text-[#3D2E24]">{order.id}</td>
+                      <td className="py-4 text-xs font-medium text-[#3D2E24]">{order.customerName}</td>
+                      <td className="py-4 text-xs font-medium text-[#3D2E24]/80 max-w-xs truncate">{itemsSummary}</td>
+                      <td className="py-4 text-xs font-bold text-[#3D2E24]">PKR {orderTotal.toLocaleString()}</td>
+                      <td className="py-4 text-xs">{statusBadge}</td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
