@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ShoppingBag,
   Users,
@@ -13,7 +13,8 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  X
+  X,
+  ExternalLink
 } from "lucide-react";
 import { mockProducts, mockCategories } from "../../lib/mock-data";
 
@@ -46,18 +47,20 @@ const initialOrders = [
 ];
 
 const mockUsers = [
-  { id: "u1", name: "Hadiqa Ehsan" },
-  { id: "u2", name: "Ali Khan" },
-  { id: "u3", name: "Sara Ahmed" }
+  { id: "u1", name: "Hadiqa Ehsan", email: "hadiqa@cozycup.com", role: "Admin" },
+  { id: "u2", name: "Ali Khan", email: "ali@gmail.com", role: "Customer" },
+  { id: "u3", name: "Sara Ahmed", email: "sara@gmail.com", role: "Customer" }
 ];
 
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSearchType, setSelectedSearchType] = useState<"all" | "order" | "product" | "user">("all");
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [revenuePeriod, setRevenuePeriod] = useState<"weekly" | "monthly">("weekly");
   const [orders, setOrders] = useState(initialOrders);
 
-  // Backend-ready notification state structure (can easily be populated via API useEffect later)
   const [notifications, setNotifications] = useState([
     { id: 1, title: "New Order Placed", desc: "Hadiqa Ehsan placed a new store order ORD-1001", time: "2m ago", read: false },
     { id: 2, title: "Low Stock Alert", desc: "Select bakery inventory is running below threshold", time: "15m ago", read: false },
@@ -80,16 +83,34 @@ export default function AdminDashboard() {
   const activeProductsCount = mockProducts.length;
   const totalUsersCount = mockUsers.length;
 
-  const filteredOrders = useMemo(() => {
-    if (!searchQuery.trim()) return orders;
+  // Comprehensive Search results across Orders, Products, and Users
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return { matchedOrders: [], matchedProducts: [], matchedUsers: [] };
     const q = searchQuery.toLowerCase();
-    return orders.filter(
-      (o) =>
-        o.id.toLowerCase().includes(q) ||
-        o.customerName.toLowerCase().includes(q) ||
-        o.items.some(i => i.name.toLowerCase().includes(q))
+
+    const matchedOrders = orders.filter(
+      o => o.id.toLowerCase().includes(q) || o.customerName.toLowerCase().includes(q)
     );
+
+    const matchedProducts = mockProducts.filter(
+      (p: any) => p.name.toLowerCase().includes(q) || (p.categorySlug && p.categorySlug.toLowerCase().includes(q))
+    );
+
+    const matchedUsers = mockUsers.filter(
+      u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    );
+
+    return { matchedOrders, matchedProducts, matchedUsers };
   }, [searchQuery, orders]);
+
+  const handleSelectSearchResult = (id: string) => {
+    setHighlightedId(id);
+    setSearchQuery(""); // Clear search box dropdown popup
+    // Auto clear highlight after 3 seconds
+    setTimeout(() => {
+      setHighlightedId(null);
+    }, 3000);
+  };
 
   const categoryBreakdown = useMemo(() => {
     const categoryMap: { [key: string]: number } = {};
@@ -118,6 +139,7 @@ export default function AdminDashboard() {
     return mockProducts.slice(0, 3).map((p: any, idx: number) => {
       const itemPrice = p.price !== undefined ? p.price : (p.priceCents ? p.priceCents / 100 : 500);
       return {
+        id: p.id,
         name: p.name,
         category: (p.categorySlug || "GENERAL").toUpperCase(),
         price: `PKR ${itemPrice}`,
@@ -127,7 +149,6 @@ export default function AdminDashboard() {
     });
   }, []);
 
-  // Clean, professional 4-point summary graph logic
   const graphPoints = useMemo(() => {
     if (revenuePeriod === "weekly") {
       return {
@@ -153,7 +174,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 text-[#3D2E24] font-sans pb-12 relative">
-      {/* Top Header */}
+      {/* Top Header with Interactive Search Box & Dropdown Results */}
       <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/80 p-6 backdrop-blur-[12px] border border-[#BDD390] shadow-md sm:flex-row sm:items-center sm:justify-between transition-all duration-300 relative z-30">
         <div>
           <h1 className="text-2xl font-black text-[#3D2E24]">Good evening, Hadiqa.</h1>
@@ -166,8 +187,8 @@ export default function AdminDashboard() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search orders, products (e.g. ORD-1001)..."
-              className="rounded-2xl border border-[#BDD390] bg-white/60 py-2.5 pl-10 pr-8 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 backdrop-blur-md shadow-sm transition-all w-64"
+              placeholder="Search orders, products, users..."
+              className="rounded-2xl border border-[#BDD390] bg-white/70 py-2.5 pl-10 pr-8 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 backdrop-blur-md shadow-sm transition-all w-72"
             />
             {searchQuery && (
               <button 
@@ -177,8 +198,65 @@ export default function AdminDashboard() {
                 <X className="h-3 w-3" />
               </button>
             )}
+
+            {/* Live Search Instant Popup Results Dropdown */}
+            {searchQuery.trim().length > 0 && (
+              <div className="absolute left-0 right-0 mt-2 rounded-2xl bg-[#F3EDD8] border border-[#BDD390] shadow-2xl z-[9999] overflow-hidden backdrop-blur-xl">
+                <div className="p-2 border-b border-[#BDD390] bg-white/40 flex items-center justify-between text-[10px] font-bold uppercase text-[#3D2E24]/70 px-3">
+                  <span>Quick Navigation Matches</span>
+                  <span>Click to jump</span>
+                </div>
+                <div className="max-h-64 overflow-y-auto p-1 space-y-1">
+                  {searchResults.matchedOrders.length === 0 && searchResults.matchedProducts.length === 0 && searchResults.matchedUsers.length === 0 ? (
+                    <div className="p-3 text-center text-xs text-[#3D2E24]/60">No exact matches found</div>
+                  ) : (
+                    <>
+                      {searchResults.matchedOrders.map(o => (
+                        <div 
+                          key={o.id}
+                          onClick={() => handleSelectSearchResult(o.id)}
+                          className="flex items-center justify-between p-2 rounded-xl hover:bg-[#BDD390]/40 cursor-pointer transition-colors text-xs"
+                        >
+                          <div>
+                            <span className="font-black text-[#3D2E24]">{o.id}</span>
+                            <span className="text-[#3D2E24]/70 ml-2">({o.customerName})</span>
+                          </div>
+                          <span className="text-[10px] bg-[#3D2E24] text-[#BDD390] px-2 py-0.5 rounded-full font-bold">Order</span>
+                        </div>
+                      ))}
+                      {searchResults.matchedProducts.map((p: any) => (
+                        <div 
+                          key={p.id}
+                          onClick={() => handleSelectSearchResult(p.id)}
+                          className="flex items-center justify-between p-2 rounded-xl hover:bg-[#BDD390]/40 cursor-pointer transition-colors text-xs"
+                        >
+                          <div>
+                            <span className="font-black text-[#3D2E24]">{p.name}</span>
+                          </div>
+                          <span className="text-[10px] bg-emerald-800 text-white px-2 py-0.5 rounded-full font-bold">Product</span>
+                        </div>
+                      ))}
+                      {searchResults.matchedUsers.map(u => (
+                        <div 
+                          key={u.id}
+                          onClick={() => handleSelectSearchResult(u.id)}
+                          className="flex items-center justify-between p-2 rounded-xl hover:bg-[#BDD390]/40 cursor-pointer transition-colors text-xs"
+                        >
+                          <div>
+                            <span className="font-black text-[#3D2E24]">{u.name}</span>
+                            <span className="text-[#3D2E24]/60 ml-2 text-[10px]">{u.role}</span>
+                          </div>
+                          <span className="text-[10px] bg-blue-800 text-white px-2 py-0.5 rounded-full font-bold">User</span>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
+          {/* Notifications Toggle */}
           <div className="relative">
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
@@ -327,7 +405,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Popular Items Section */}
+      {/* Popular Items Section with Highlight Support */}
       <div className="space-y-4 relative z-10">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-[#3D2E24] flex items-center gap-2">
@@ -337,26 +415,36 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {popularDishes.map((dish, i) => (
-            <div key={i} className="rounded-3xl bg-[#F3EDD8]/50 p-5 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-[#3D2E24]">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-[11px] font-bold bg-[#3D2E24] text-[#BDD390] px-2.5 py-1 rounded-full shadow-sm">
-                  {dish.tag}
-                </span>
-                <span className="text-xs font-bold text-[#3D2E24]/60">{dish.orders}</span>
+          {popularDishes.map((dish) => {
+            const isHighlighted = highlightedId === dish.id;
+            return (
+              <div 
+                key={dish.id} 
+                className={`rounded-3xl p-5 backdrop-blur-[12px] border transition-all duration-500 shadow-md ${
+                  isHighlighted 
+                    ? 'bg-amber-200/90 border-[#3D2E24] ring-4 ring-amber-400 scale-105 shadow-2xl' 
+                    : 'bg-[#F3EDD8]/50 border-[#BDD390]/60 hover:-translate-y-1.5 hover:shadow-xl hover:border-[#3D2E24]'
+                }`}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[11px] font-bold bg-[#3D2E24] text-[#BDD390] px-2.5 py-1 rounded-full shadow-sm">
+                    {dish.tag}
+                  </span>
+                  <span className="text-xs font-bold text-[#3D2E24]/60">{dish.orders}</span>
+                </div>
+                <h3 className="text-base font-black text-[#3D2E24] mt-2">{dish.name}</h3>
+                <p className="text-xs text-[#3D2E24]/70">{dish.category}</p>
+                <div className="mt-4 flex items-center justify-between pt-3 border-t border-[#BDD390]/40">
+                  <span className="text-sm font-black text-[#3D2E24]">{dish.price}</span>
+                  <span className="text-xs font-bold text-emerald-800 bg-[#BDD390]/60 px-2.5 py-1 rounded-xl">Available</span>
+                </div>
               </div>
-              <h3 className="text-base font-black text-[#3D2E24] mt-2">{dish.name}</h3>
-              <p className="text-xs text-[#3D2E24]/70">{dish.category}</p>
-              <div className="mt-4 flex items-center justify-between pt-3 border-t border-[#BDD390]/40">
-                <span className="text-sm font-black text-[#3D2E24]">{dish.price}</span>
-                <span className="text-xs font-bold text-emerald-800 bg-[#BDD390]/60 px-2.5 py-1 rounded-xl">Available</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Recent Orders Table Section */}
+      {/* Recent Orders Section (Fully Interactive & Highlightable Rows) */}
       <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md relative z-10">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
@@ -364,7 +452,7 @@ export default function AdminDashboard() {
             <p className="text-xs text-[#3D2E24]/60">Live orders fetched directly from active orders</p>
           </div>
           <span className="text-xs font-bold bg-[#BDD390] px-3 py-1.5 rounded-xl text-[#3D2E24] shadow-sm">
-            {filteredOrders.length} Orders Listed
+            {orders.length} Total Orders
           </span>
         </div>
 
@@ -380,44 +468,47 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#BDD390]/30">
-              {filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-8 text-center text-xs text-[#3D2E24]/60 font-medium">
-                    No matching orders found for your search query. Try searching &quot;ORD-1001&quot; or &quot;Hadiqa&quot;.
-                  </td>
-                </tr>
-              ) : (
-                filteredOrders.map((order) => {
-                  const orderTotal = order.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-                  const itemsSummary = order.items.map(i => `${i.quantity}x ${i.name}`).join(", ");
-                  
-                  const statusBadge = 
-                    order.status === "Pending" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-amber-200 text-amber-900 border border-amber-300 animate-pulse">
-                        <Clock className="h-3 w-3" /> Pending
-                      </span>
-                    ) :
-                    order.status === "Processing" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-blue-200 text-blue-900 border border-blue-300">
-                        <AlertCircle className="h-3 w-3" /> Processing
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-emerald-200 text-emerald-900 border border-emerald-300">
-                        <CheckCircle2 className="h-3 w-3" /> Delivered
-                      </span>
-                    );
-
-                  return (
-                    <tr key={order.id} className="transition-colors hover:bg-white/40">
-                      <td className="py-4 text-xs font-bold text-[#3D2E24]">{order.id}</td>
-                      <td className="py-4 text-xs font-medium text-[#3D2E24]">{order.customerName}</td>
-                      <td className="py-4 text-xs font-medium text-[#3D2E24]/80 max-w-xs truncate">{itemsSummary}</td>
-                      <td className="py-4 text-xs font-bold text-[#3D2E24]">PKR {orderTotal.toLocaleString()}</td>
-                      <td className="py-4 text-xs">{statusBadge}</td>
-                    </tr>
+              {orders.map((order) => {
+                const orderTotal = order.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+                const itemsSummary = order.items.map(i => `${i.quantity}x ${i.name}`).join(", ");
+                const isHighlighted = highlightedId === order.id;
+                
+                const statusBadge = 
+                  order.status === "Pending" ? (
+                    <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-amber-200 text-amber-900 border border-amber-300 animate-pulse">
+                      <Clock className="h-3 w-3" /> Pending
+                    </span>
+                  ) :
+                  order.status === "Processing" ? (
+                    <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-blue-200 text-blue-900 border border-blue-300">
+                      <AlertCircle className="h-3 w-3" /> Processing
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-emerald-200 text-emerald-900 border border-emerald-300">
+                      <CheckCircle2 className="h-3 w-3" /> Delivered
+                    </span>
                   );
-                })
-              )}
+
+                return (
+                  <tr 
+                    key={order.id} 
+                    className={`transition-all duration-500 ${
+                      isHighlighted 
+                        ? 'bg-amber-300/80 ring-2 ring-amber-500 shadow-inner font-bold' 
+                        : 'hover:bg-white/40'
+                    }`}
+                  >
+                    <td className="py-4 text-xs font-bold text-[#3D2E24] flex items-center gap-1.5">
+                      {order.id}
+                      {isHighlighted && <ExternalLink className="h-3 w-3 text-amber-900 animate-bounce" />}
+                    </td>
+                    <td className="py-4 text-xs font-medium text-[#3D2E24]">{order.customerName}</td>
+                    <td className="py-4 text-xs font-medium text-[#3D2E24]/80 max-w-xs truncate">{itemsSummary}</td>
+                    <td className="py-4 text-xs font-bold text-[#3D2E24]">PKR {orderTotal.toLocaleString()}</td>
+                    <td className="py-4 text-xs">{statusBadge}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
