@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { mockProducts, mockCategories } from "../../lib/mock-data";
 
-const mockOrders = [
+const initialOrders = [
   {
     id: "ORD-1001",
     customerName: "Hadiqa Ehsan",
@@ -55,9 +55,11 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [revenuePeriod, setRevenuePeriod] = useState<"weekly" | "monthly">("weekly");
+  const [orders, setOrders] = useState(initialOrders);
 
+  // Backend-ready notification state structure (can easily be populated via API useEffect later)
   const [notifications, setNotifications] = useState([
-    { id: 1, title: "New Order Placed", desc: "Hadiqa Ehsan placed a new store order", time: "2m ago", read: false },
+    { id: 1, title: "New Order Placed", desc: "Hadiqa Ehsan placed a new store order ORD-1001", time: "2m ago", read: false },
     { id: 2, title: "Low Stock Alert", desc: "Select bakery inventory is running below threshold", time: "15m ago", read: false },
     { id: 3, title: "System Sync", desc: "Database successfully synced with backend", time: "1h ago", read: true },
   ]);
@@ -69,29 +71,29 @@ export default function AdminDashboard() {
   };
 
   const totalRevenue = useMemo(() => {
-    return mockOrders.reduce((acc, order) => {
+    return orders.reduce((acc, order) => {
       return acc + order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     }, 0);
-  }, []);
+  }, [orders]);
 
-  const totalOrdersCount = mockOrders.length;
+  const totalOrdersCount = orders.length;
   const activeProductsCount = mockProducts.length;
   const totalUsersCount = mockUsers.length;
 
   const filteredOrders = useMemo(() => {
-    if (!searchQuery.trim()) return mockOrders;
+    if (!searchQuery.trim()) return orders;
     const q = searchQuery.toLowerCase();
-    return mockOrders.filter(
+    return orders.filter(
       (o) =>
         o.id.toLowerCase().includes(q) ||
         o.customerName.toLowerCase().includes(q) ||
         o.items.some(i => i.name.toLowerCase().includes(q))
     );
-  }, [searchQuery]);
+  }, [searchQuery, orders]);
 
   const categoryBreakdown = useMemo(() => {
     const categoryMap: { [key: string]: number } = {};
-    mockOrders.forEach(order => {
+    orders.forEach(order => {
       order.items.forEach(item => {
         const foundProduct: any = mockProducts.find((p: any) => p.id === item.productId);
         const catSlug = foundProduct ? (foundProduct.categorySlug || "other") : "other";
@@ -110,7 +112,7 @@ export default function AdminDashboard() {
         bar2: Math.min(90, Math.max(25, percentage * 1.5)),
       };
     });
-  }, []);
+  }, [orders]);
 
   const popularDishes = useMemo(() => {
     return mockProducts.slice(0, 3).map((p: any, idx: number) => {
@@ -125,6 +127,7 @@ export default function AdminDashboard() {
     });
   }, []);
 
+  // Clean, professional 4-point summary graph logic
   const graphPoints = useMemo(() => {
     if (revenuePeriod === "weekly") {
       return {
@@ -136,7 +139,7 @@ export default function AdminDashboard() {
       return {
         path: "M 0 110 Q 125 15, 250 70 T 375 30 T 500 50 L 500 160 L 0 160 Z",
         line: "M 0 110 Q 125 15, 250 70 T 375 30 T 500 50",
-        values: ["Jan", "Feb", "Mar", "Apr"]
+        values: ["Jan", "Apr", "Jul", "Oct"]
       };
     }
   }, [revenuePeriod]);
@@ -163,8 +166,8 @@ export default function AdminDashboard() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search orders, products..."
-              className="rounded-2xl border border-[#BDD390] bg-white/60 py-2.5 pl-10 pr-8 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 backdrop-blur-md shadow-sm transition-all"
+              placeholder="Search orders, products (e.g. ORD-1001)..."
+              className="rounded-2xl border border-[#BDD390] bg-white/60 py-2.5 pl-10 pr-8 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 backdrop-blur-md shadow-sm transition-all w-64"
             />
             {searchQuery && (
               <button 
@@ -264,7 +267,7 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-            <p className="text-xs text-[#3D2E24]/60">Revenue trend based on mock order data</p>
+            <p className="text-xs text-[#3D2E24]/60">Revenue trend overview</p>
           </div>
 
           <div className="my-6 relative h-40 w-full">
@@ -281,9 +284,6 @@ export default function AdminDashboard() {
 
               <path d={graphPoints.path} fill="url(#incomeGradient)" />
               <path d={graphPoints.line} fill="none" stroke="#3D2E24" strokeWidth="3.5" />
-              <circle cx="150" cy="85" r="5.5" fill="#3D2E24" className="cursor-pointer" />
-              <circle cx="300" cy="45" r="5.5" fill="#BDD390" stroke="#3D2E24" strokeWidth="2.5" className="cursor-pointer" />
-              <circle cx="450" cy="25" r="5.5" fill="#3D2E24" className="cursor-pointer" />
             </svg>
           </div>
 
@@ -361,7 +361,7 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
             <h2 className="text-lg font-black text-[#3D2E24]">Recent Customer Orders</h2>
-            <p className="text-xs text-[#3D2E24]/60">Live orders fetched directly from mock data</p>
+            <p className="text-xs text-[#3D2E24]/60">Live orders fetched directly from active orders</p>
           </div>
           <span className="text-xs font-bold bg-[#BDD390] px-3 py-1.5 rounded-xl text-[#3D2E24] shadow-sm">
             {filteredOrders.length} Orders Listed
@@ -383,7 +383,7 @@ export default function AdminDashboard() {
               {filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-xs text-[#3D2E24]/60 font-medium">
-                    No matching orders found for your search query.
+                    No matching orders found for your search query. Try searching &quot;ORD-1001&quot; or &quot;Hadiqa&quot;.
                   </td>
                 </tr>
               ) : (
