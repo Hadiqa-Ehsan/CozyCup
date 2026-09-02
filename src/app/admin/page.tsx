@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { mockProducts, mockCategories } from "../../lib/mock-data";
 
-// Self-contained mock orders and users to prevent any import or type mismatch errors
 const mockOrders = [
   {
     id: "ORD-1001",
@@ -137,7 +136,7 @@ export default function AdminDashboard() {
       return {
         path: "M 0 110 Q 125 15, 250 70 T 375 30 T 500 50 L 500 160 L 0 160 Z",
         line: "M 0 110 Q 125 15, 250 70 T 375 30 T 500 50",
-        values: ["Week 1", "Week 2", "Week 3", "Week 4"]
+        values: ["Jan", "Feb", "Mar", "Apr"]
       };
     }
   }, [revenuePeriod]);
@@ -152,7 +151,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8 text-[#3D2E24] font-sans pb-12 relative">
       {/* Top Header */}
-      <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/80 p-6 backdrop-blur-[12px] border border-[#BDD390] shadow-md sm:flex-row sm:items-center sm:justify-between transition-all duration-300">
+      <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/80 p-6 backdrop-blur-[12px] border border-[#BDD390] shadow-md sm:flex-row sm:items-center sm:justify-between transition-all duration-300 relative z-30">
         <div>
           <h1 className="text-2xl font-black text-[#3D2E24]">Good evening, Hadiqa.</h1>
           <p className="text-sm font-medium text-[#3D2E24]/70">CozyCup Café Management & Analytics Hub</p>
@@ -161,11 +160,11 @@ export default function AdminDashboard() {
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3D2E24]/50" />
             <input
-              type="search"
+              type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search orders, products..."
-              className="rounded-2xl border border-[#BDD390] bg-white/60 py-2.5 pl-10 pr-4 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 backdrop-blur-md shadow-sm transition-all"
+              className="rounded-2xl border border-[#BDD390] bg-white/60 py-2.5 pl-10 pr-8 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 backdrop-blur-md shadow-sm transition-all"
             />
             {searchQuery && (
               <button 
@@ -189,7 +188,7 @@ export default function AdminDashboard() {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-3 w-80 rounded-3xl bg-[#F3EDD8] p-4 border border-[#BDD390] shadow-2xl z-50 backdrop-blur-xl">
+              <div className="absolute right-0 mt-3 w-80 rounded-3xl bg-[#F3EDD8] p-4 border border-[#BDD390] shadow-2xl z-[999] backdrop-blur-xl">
                 <div className="flex items-center justify-between pb-3 border-b border-[#BDD390]">
                   <span className="text-xs font-black uppercase tracking-wider text-[#3D2E24]">Notifications</span>
                   <div className="flex items-center gap-2">
@@ -217,7 +216,7 @@ export default function AdminDashboard() {
       </header>
 
       {/* 4 Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 relative z-10">
         {stats.map((stat) => (
           <div
             key={stat.title}
@@ -241,7 +240,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Graphs Section */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 relative z-10">
         {/* Income Analytics */}
         <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#3D2E24]">
           <div>
@@ -329,7 +328,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Popular Items Section */}
-      <div className="space-y-4">
+      <div className="space-y-4 relative z-10">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-[#3D2E24] flex items-center gap-2">
             <Coffee className="h-5 w-5 text-[#3D2E24]" /> Popular CozyCup Items
@@ -358,7 +357,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Orders Table Section */}
-      <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md">
+      <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md relative z-10">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
             <h2 className="text-lg font-black text-[#3D2E24]">Recent Customer Orders</h2>
