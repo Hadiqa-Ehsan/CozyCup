@@ -1,16 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Search, Shield, User, X, CheckCircle2 } from "lucide-react";
+import { Users, Search, Shield, User, X, Trash2, Circle } from "lucide-react";
 
-const initialUsers = [
-  { id: "u1", name: "Hadiqa Ehsan", email: "hadiqa@cozycup.com", role: "Admin", joined: "May 2026", status: "Active" },
-  { id: "u2", name: "Ali Khan", email: "ali@gmail.com", role: "Customer", joined: "June 2026", status: "Active" },
-  { id: "u3", name: "Sara Ahmed", email: "sara@gmail.com", role: "Customer", joined: "July 2026", status: "Active" }
+interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "Admin" | "Customer";
+  joined: string;
+  isLoggedIn: boolean;
+}
+
+const initialUsers: AppUser[] = [
+  { id: "u1", name: "Hadiqa Ehsan", email: "hadiqa@cozycup.com", role: "Admin", joined: "May 2026", isLoggedIn: true },
+  { id: "u2", name: "Ali Khan", email: "ali@gmail.com", role: "Customer", joined: "June 2026", isLoggedIn: true },
+  { id: "u3", name: "Sara Ahmed", email: "sara@gmail.com", role: "Customer", joined: "July 2026", isLoggedIn: false }
 ];
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState<AppUser[]>(initialUsers);
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredUsers = users.filter(
@@ -18,33 +27,42 @@ export default function AdminUsersPage() {
          u.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleDeleteUser = (id: string) => {
+    if (confirm("Are you sure you want to remove this user from the platform?")) {
+      setUsers(users.filter(u => u.id !== id));
+    }
+  };
+
   return (
     <div className="space-y-8 text-[#3D2E24] font-sans pb-12">
       <header className="flex flex-col gap-4 rounded-3xl bg-[#F3EDD8]/80 p-6 backdrop-blur-[12px] border border-[#BDD390] shadow-md sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-black text-[#3D2E24]">Manage Users</h1>
-          <p className="text-sm font-medium text-[#3D2E24]/70">View platform accounts and customer profiles</p>
+          <p className="text-sm font-medium text-[#3D2E24]/70">View platform accounts and monitor live login status</p>
         </div>
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3D2E24]/50" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search users or email..."
-            className="rounded-2xl border border-[#BDD390] bg-white/70 py-2.5 pl-10 pr-8 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 shadow-sm w-72"
-          />
-          {searchQuery && (
-            <button 
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-[#3D2E24]/10 rounded-full p-1 hover:bg-[#3D2E24]/20"
-            >
-              <X className="h-3 w-3" />
-            </button>
-          )}
+        <div className="relative flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3D2E24]/50" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search users or email..."
+              className="rounded-2xl border border-[#BDD390] bg-white/70 py-2.5 pl-10 pr-8 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 shadow-sm w-64"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-[#3D2E24]/10 rounded-full p-1 hover:bg-[#3D2E24]/20"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
+      {/* Users Table */}
       <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-black text-[#3D2E24] flex items-center gap-2">
@@ -63,7 +81,8 @@ export default function AdminUsersPage() {
                 <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Email Address</th>
                 <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Role</th>
                 <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Joined Date</th>
-                <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Status</th>
+                <th className="py-3 text-left text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Login Status</th>
+                <th className="py-3 text-right text-xs font-bold text-[#3D2E24]/70 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#BDD390]/30">
@@ -81,9 +100,24 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="py-4 text-xs font-medium text-[#3D2E24]/70">{u.joined}</td>
                   <td className="py-4 text-xs">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-200 text-emerald-900 border border-emerald-300">
-                      <CheckCircle2 className="h-3 w-3" /> {u.status}
-                    </span>
+                    {u.isLoggedIn ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-200 text-emerald-900 border border-emerald-300">
+                        <Circle className="h-2 w-2 fill-emerald-700 text-emerald-700 animate-pulse" /> Active (Logged In)
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-700 border border-gray-300">
+                        <Circle className="h-2 w-2 fill-gray-500 text-gray-500" /> Not Active
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-4 text-xs text-right">
+                    <button
+                      onClick={() => handleDeleteUser(u.id)}
+                      className="p-2 rounded-xl bg-red-100 border border-red-300 text-red-800 hover:bg-red-800 hover:text-white transition-all shadow-sm"
+                      title="Remove User"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </td>
                 </tr>
               ))}
