@@ -138,7 +138,7 @@ export default function RegisterPage() {
               </label>
               <input
                 type="email"
-                placeholder="hadiqaehsan@gmail.com"
+                placeholder="name@example.com"
                 className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-xs text-[#3D2E24] outline-none transition focus:border-[#98AB81] focus:ring-2 focus:ring-[#98AB81]/30 placeholder:text-gray-400"
                 {...register("email")}
               />

@@ -77,7 +77,12 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const displayLabel = branch?.name || "Select Location";
+  // City, Branch Name, aur Order Type (Pickup/Delivery) teenon show hon gay
+  const orderTypeName = branch?.orderType === "pickup" ? "Pickup" : "Delivery";
+  const displayLabel = branch?.name 
+    ? `${branch.city ? branch.city + " - " : ""}${branch.name} (${orderTypeName})` 
+    : "Select Location";
+    
   const orderTypeLabel = branch?.orderType === "delivery" ? "Delivery from" : "Pick-Up from";
 
   // Determine if header should be sticky
