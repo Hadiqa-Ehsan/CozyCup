@@ -37,6 +37,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push("/");
   };
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Cozy Cup Admin",
+          text: "Cozy Cup Store Management",
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log("Error sharing:", err);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Link copied to clipboard!");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F3EDD8] p-4 lg:p-6 text-[#2D231F] flex flex-col justify-between">
       {/* Mobile Menu Button */}
@@ -48,14 +65,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </button>
 
       <div className="mx-auto flex w-full max-w-7xl gap-6 flex-1">
-        {/* Sidebar matching store header brown #2D231F */}
+        {/* Sidebar */}
         <aside
           className={`fixed inset-y-4 left-4 z-40 w-64 rounded-3xl bg-[#2D231F] p-6 shadow-xl transition-transform duration-300 lg:static lg:flex lg:flex-col lg:justify-between ${
             sidebarOpen ? "translate-x-0" : "-translate-x-[120%] lg:translate-x-0"
           }`}
         >
           <div className="space-y-6">
-            {/* Profile Box */}
             <div className="rounded-2xl bg-[#3D312B] p-4 text-[#F3EDD8] border border-[#BDD390]/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -70,7 +86,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             </div>
 
-            {/* Quick Navigation to Website Homepage */}
             <Link
               href="/"
               className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-xs font-bold bg-[#BDD390]/10 text-[#BDD390] border border-[#BDD390]/30 hover:bg-[#BDD390] hover:text-[#2D231F] transition-all"
@@ -117,7 +132,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </main>
       </div>
 
-      {/* Admin Dashboard Footer (Menu link removed, other working links kept) */}
+      {/* Admin Dashboard Footer */}
       <footer className="mx-auto mt-8 w-full max-w-7xl rounded-3xl bg-[#2D231F] px-8 py-10 text-[#F3EDD8] shadow-xl">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="space-y-4">
@@ -131,9 +146,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Artisanal coffee, fresh bakery items, and daily essentials delivered right to your doorstep with love and care.
             </p>
             <div className="flex items-center gap-3 pt-2">
-              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#2D231F] transition-colors"><Globe className="h-4 w-4 text-[#BDD390]" /></a>
-              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#2D231F] transition-colors"><Share2 className="h-4 w-4 text-[#BDD390]" /></a>
-              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#2D231F] transition-colors"><MessageCircle className="h-4 w-4 text-[#BDD390]" /></a>
+              <a href="/" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#2D231F] transition-colors text-[#BDD390]" title="Home"><Globe className="h-4 w-4" /></a>
+              <button onClick={handleShare} className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#2D231F] transition-colors text-[#BDD390]" title="Share"><Share2 className="h-4 w-4" /></button>
+              <a href="https://wa.me/923004805000" target="_blank" rel="noopener noreferrer" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-[#BDD390] hover:text-[#2D231F] transition-colors text-[#BDD390]" title="WhatsApp"><MessageCircle className="h-4 w-4" /></a>
             </div>
           </div>
 
@@ -148,18 +163,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div>
             <h3 className="text-xs font-bold uppercase tracking-widest text-[#BDD390]">Company</h3>
             <ul className="mt-4 space-y-2 text-xs font-medium text-[#F3EDD8]/80">
-              <li><a href="#" className="hover:text-white">About Cozy Cup</a></li>
-              <li><a href="#" className="hover:text-white">Careers</a></li>
-              <li><a href="#" className="hover:text-white">FAQ</a></li>
+              <li><Link href="/about" className="hover:text-white">About Cozy Cup</Link></li>
+              <li><Link href="/careers" className="hover:text-white">Careers</Link></li>
+              <li><Link href="/faq" className="hover:text-white">FAQ</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-xs font-bold uppercase tracking-widest text-[#BDD390]">Contact</h3>
             <ul className="mt-4 space-y-2 text-xs font-medium text-[#F3EDD8]/80">
-              <li>+92 300 4805000</li>
-              <li>Info@CozyCup.com.pk</li>
-              <li>5 branches • citywide</li>
+              <li><a href="tel:+923004805000" className="hover:text-[#BDD390] underline">+92 300 4805000</a></li>
+              <li><a href="mailto:Info@CozyCup.com.pk" className="hover:text-[#BDD390] underline">Info@CozyCup.com.pk</a></li>
+              <li className="text-[#F3EDD8]/60">5 branches • citywide</li>
             </ul>
           </div>
         </div>
