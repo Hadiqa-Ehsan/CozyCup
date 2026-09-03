@@ -65,8 +65,6 @@ export default function AdminDashboard() {
   // Refs for smooth scrolling to sections
   const ordersSectionRef = useRef<HTMLDivElement>(null);
   const popularSectionRef = useRef<HTMLDivElement>(null);
-  const orderItemRefs = useRef<{ [key: string]: HTMLTableRowElement | null }>({});
-  const productItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const [notifications, setNotifications] = useState([
     { id: 1, title: "New Order Placed", desc: "Hadiqa Ehsan placed a new store order ORD-1001", time: "2m ago", read: false },
@@ -122,7 +120,6 @@ export default function AdminDashboard() {
       setHighlightedProductId(id);
       setTimeout(() => setHighlightedProductId(null), 3000);
     } else if (type === "user") {
-      // Since users table isn't displayed directly on dashboard bottom, scroll to orders/top or handle gracefully
       ordersSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       setHighlightedUserId(id);
       setTimeout(() => setHighlightedUserId(null), 3000);
@@ -218,7 +215,7 @@ export default function AdminDashboard() {
 
             {/* Interactive Clickable Search Popup Dropdown */}
             {searchQuery.trim().length > 0 && (
-              <div className="absolute left-0 right-0 mt-2 rounded-2xl bg-[#F3EDD8] border border-[#BDD390] shadow-2xl z-[9999] overflow-hidden backdrop-blur-xl">
+              <div className="absolute left-0 right-0 mt-2 rounded-2xl bg-[#F3EDD8] border border-[#BDD390] shadow-2xl z-[99999] overflow-hidden backdrop-blur-xl pointer-events-auto">
                 <div className="p-2 border-b border-[#BDD390] bg-white/40 flex items-center justify-between text-[10px] font-bold uppercase text-[#3D2E24]/70 px-3">
                   <span>Search Results</span>
                   <span>Click to locate</span>
@@ -231,8 +228,11 @@ export default function AdminDashboard() {
                       {searchResults.matchedOrders.map(o => (
                         <div 
                           key={o.id} 
-                          onClick={() => handleSelectSearchResult("order", o.id)}
-                          className="flex items-center justify-between p-2 rounded-xl bg-white/50 hover:bg-[#BDD390] cursor-pointer text-xs transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectSearchResult("order", o.id);
+                          }}
+                          className="flex items-center justify-between p-2 rounded-xl bg-white/70 hover:bg-[#BDD390] cursor-pointer text-xs transition-all select-none"
                         >
                           <div>
                             <span className="font-black text-[#3D2E24]">{o.id}</span>
@@ -244,8 +244,11 @@ export default function AdminDashboard() {
                       {searchResults.matchedProducts.map((p: any) => (
                         <div 
                           key={p.id} 
-                          onClick={() => handleSelectSearchResult("product", p.id)}
-                          className="flex items-center justify-between p-2 rounded-xl bg-white/50 hover:bg-[#BDD390] cursor-pointer text-xs transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectSearchResult("product", p.id);
+                          }}
+                          className="flex items-center justify-between p-2 rounded-xl bg-white/70 hover:bg-[#BDD390] cursor-pointer text-xs transition-all select-none"
                         >
                           <div>
                             <span className="font-black text-[#3D2E24]">{p.name}</span>
@@ -256,8 +259,11 @@ export default function AdminDashboard() {
                       {searchResults.matchedUsers.map(u => (
                         <div 
                           key={u.id} 
-                          onClick={() => handleSelectSearchResult("user", u.id)}
-                          className="flex items-center justify-between p-2 rounded-xl bg-white/50 hover:bg-[#BDD390] cursor-pointer text-xs transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectSearchResult("user", u.id);
+                          }}
+                          className="flex items-center justify-between p-2 rounded-xl bg-white/70 hover:bg-[#BDD390] cursor-pointer text-xs transition-all select-none"
                         >
                           <div>
                             <span className="font-black text-[#3D2E24]">{u.name}</span>
