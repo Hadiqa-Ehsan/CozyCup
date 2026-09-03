@@ -13,8 +13,9 @@ export function ClientLayoutWrapper({ children }: { children: React.ReactNode })
   const cleanPath = pathname?.replace(/\/$/, "") || "";
   const isPolicyPage = cleanPath === "/terms" || cleanPath === "/privacy" || cleanPath === "/privacy-policy";
   const isAdmin = cleanPath.startsWith("/admin");
+  const isStandalonePage = cleanPath === "/about" || cleanPath === "/careers" || cleanPath === "/faq";
 
-  const hideHeaderFooter = isPolicyPage || isAdmin;
+  const hideHeaderFooter = isPolicyPage || isAdmin || isStandalonePage;
 
   return (
     <>
