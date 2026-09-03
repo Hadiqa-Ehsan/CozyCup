@@ -33,8 +33,11 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  const { items, clear } = useCartStore();
-  const { branch, fulfillmentType } = useBranchStore();
+  const { items, clearCart } = useCartStore();
+  const { branch } = useBranchStore();
+
+  const fulfillmentType =
+    branch?.orderType === "delivery" ? "DELIVERY" : "PICKUP";
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -77,7 +80,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=/checkout");
+      router.replace("/login?callbackUrl=/checkout");
     }
   }, [status, router]);
 
@@ -105,7 +108,7 @@ export default function CheckoutPage() {
   }
 
   if (status === "unauthenticated") {
-    return null; 
+    return null;
   }
 
   if (items.length === 0) {
@@ -131,10 +134,8 @@ export default function CheckoutPage() {
   }
 
   const getItemPrice = (item: any) => {
-    const raw = item.priceCents !== undefined && item.priceCents !== null 
-      ? item.priceCents 
-      : (item.price !== undefined && item.price !== null ? item.price : 0);
-    
+    const raw = item.price !== undefined && item.price !== null ? item.price : 0;
+
     if (typeof raw === "string") {
       const parsed = parseFloat(raw.replace(/[^0-9.]/g, ""));
       return isNaN(parsed) ? 0 : parsed;
@@ -233,7 +234,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      clear();
+      clearCart();
       setStatusModal({
         open: true,
         success: true,
@@ -460,7 +461,7 @@ export default function CheckoutPage() {
 
                 <div className="max-h-[380px] overflow-y-auto px-6 py-4 space-y-4">
                   {items.map((item) => {
-                    const imageSrc = item.image || item.imageUrl || "";
+                    const imageSrc = item.image || "";
                     const price = getItemPrice(item);
                     const quantity = Number(item.quantity) || 1;
                     const itemTotal = price * quantity;

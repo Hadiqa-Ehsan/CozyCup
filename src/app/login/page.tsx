@@ -38,7 +38,9 @@ function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("next") || "/";
 
   const handleClose = () => {
-    if (callbackUrl && callbackUrl !== "/login") {
+    if (callbackUrl === "/checkout" && window.history.length > 1) {
+      window.history.back();
+    } else if (callbackUrl && callbackUrl !== "/login") {
       window.location.href = callbackUrl;
     } else if (window.history.length > 2) {
       window.history.back();
