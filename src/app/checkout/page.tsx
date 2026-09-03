@@ -31,7 +31,7 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const { items, clear } = useCartStore();
   const { branch, fulfillmentType } = useBranchStore();
@@ -75,6 +75,13 @@ export default function CheckoutPage() {
 
   useEffect(() => setMounted(true), []);
 
+  // Check authentication status and redirect to login with callback URL if unauthenticated
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=/checkout");
+    }
+  }, [status, router]);
+
   useEffect(() => {
     if (session?.user) {
       if (session.user.name && !name) setName(session.user.name);
@@ -90,7 +97,17 @@ export default function CheckoutPage() {
     return () => clearInterval(timer);
   }, [isVerificationModalOpen, countdown]);
 
-  if (!mounted) return null;
+  if (!mounted || status === "loading") {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#F4F6F0]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#98AB81]" />
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return null; // Will redirect via useEffect
+  }
 
   if (items.length === 0) {
     return (
@@ -127,7 +144,6 @@ export default function CheckoutPage() {
     return Number(raw) || 0;
   };
 
-  // Format price in rupees with PKR prefix
   const formatPriceRupees = (amount: number) => {
     return `PKR ${amount.toFixed(2)}`;
   };
