@@ -33,14 +33,15 @@ function LoginForm() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const next = searchParams.get("next") || "/";
+  
+  // Handled both callbackUrl and next for robust param retrieval
+  const next = searchParams.get("callbackUrl") || searchParams.get("next") || "/";
 
   const {
     register,
     handleSubmit,
     trigger,
     getValues,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(fullLoginSchema),
@@ -106,21 +107,26 @@ function LoginForm() {
         {/* Card Container */}
         <div className="relative w-full rounded-[22px] bg-[#F6F4EB] p-7 shadow-2xl">
           
-          {/* Close Button */}
+          {/* Close Button with safe window history fallback */}
           <button
-            onClick={() => router.back()}
+            type="button"
+            onClick={() => {
+              if (window.history.length > 2) {
+                router.back();
+              } else {
+                router.push("/");
+              }
+            }}
             className="absolute right-4 top-4 rounded-full bg-gray-400/30 p-1.5 text-[#3D2E24] hover:bg-gray-400/50 transition"
             aria-label="Close"
           >
             <X className="h-5 w-5 stroke-[2.5]" />
           </button>
 
-          {/* Heading */}
           <h1 className="mb-6 text-center text-3xl font-extrabold text-[#3D2E24]">
             Sign In
           </h1>
 
-          {/* Alert Messages */}
           {success && (
             <div className="mb-4 rounded-xl border border-green-600 bg-green-50 p-3 text-center text-xs font-semibold text-green-700">
               Login successful! Redirecting...
@@ -143,8 +149,6 @@ function LoginForm() {
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            
-            {/* Step 1: Email Input */}
             {step === "email" && (
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-[#3D2E24]">
@@ -162,7 +166,6 @@ function LoginForm() {
               </div>
             )}
 
-            {/* Step 2: Active Email Chip + Password Input */}
             {step === "password" && (
               <>
                 <div className="flex items-center justify-between rounded-2xl border border-gray-300 bg-white px-4 py-2.5">
@@ -206,7 +209,6 @@ function LoginForm() {
               </>
             )}
 
-            {/* Action Button */}
             {step === "email" ? (
               <button
                 type="button"
@@ -226,7 +228,6 @@ function LoginForm() {
             )}
           </form>
 
-          {/* Need Help? Dropdown */}
           <div className="mt-5">
             <button
               type="button"
@@ -255,7 +256,6 @@ function LoginForm() {
             )}
           </div>
 
-          {/* Create Account Link */}
           <div className="mt-4 text-center text-xs">
             <Link
               href="/register"

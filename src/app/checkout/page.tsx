@@ -40,7 +40,7 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState("Rawalpindi");
   const [area, setArea] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "CARD_DELIVERY" | "ONLINE">("COD");
@@ -75,7 +75,6 @@ export default function CheckoutPage() {
 
   useEffect(() => setMounted(true), []);
 
-  // Check authentication status and redirect to login with callback URL if unauthenticated
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login?callbackUrl=/checkout");
@@ -106,7 +105,7 @@ export default function CheckoutPage() {
   }
 
   if (status === "unauthenticated") {
-    return null; // Will redirect via useEffect
+    return null; 
   }
 
   if (items.length === 0) {
@@ -131,7 +130,6 @@ export default function CheckoutPage() {
     );
   }
 
-  // Safe Price Calculation Helpers
   const getItemPrice = (item: any) => {
     const raw = item.priceCents !== undefined && item.priceCents !== null 
       ? item.priceCents 
@@ -183,6 +181,10 @@ export default function CheckoutPage() {
     e.preventDefault();
     if (!deliveryTime) {
       setError("Please select a delivery time.");
+      return;
+    }
+    if (fulfillmentType === "DELIVERY" && !address) {
+      setError("Please provide a delivery address.");
       return;
     }
     setError(null);
@@ -287,7 +289,6 @@ export default function CheckoutPage() {
 
         <form onSubmit={handleInitialSubmit}>
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-            {/* Customer Details Form */}
             <div className="flex flex-col gap-6 lg:col-span-8">
               <div className="rounded-2xl border border-[#98AB81]/40 bg-white p-6 shadow-xs transition-all hover:border-[#98AB81] hover:shadow-md">
                 <div className="mb-4 border-b border-[#98AB81]/20 pb-2">
@@ -345,7 +346,6 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Address Box */}
                 <div className="mt-6 rounded-xl border border-[#98AB81]/40 bg-[#98AB81]/10 p-4 transition-all hover:border-[#98AB81] hover:bg-[#98AB81]/20">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-[#3D2E24]">Your Address</span>
@@ -374,7 +374,6 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Delivery Time */}
               <div className="rounded-2xl border border-[#98AB81]/40 bg-white p-6 shadow-xs transition-all hover:border-[#98AB81] hover:shadow-md flex flex-col gap-5">
                 <div>
                   <Label htmlFor="deliveryTime" className="mb-2 block text-xs font-semibold text-[#3D2E24]">
@@ -408,7 +407,6 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Payment Option */}
               <div className="rounded-2xl border border-[#98AB81]/40 bg-white p-6 shadow-xs transition-all hover:border-[#98AB81] hover:shadow-md">
                 <Label className="mb-3 block text-xs font-semibold text-[#3D2E24]">Select Payment Method</Label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -454,7 +452,6 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Sidebar Cart Summary */}
             <div className="lg:col-span-4">
               <div className="sticky top-6 overflow-hidden rounded-2xl border border-[#98AB81]/40 bg-white shadow-xs transition-all hover:border-[#98AB81] hover:shadow-lg">
                 <div className="border-b border-[#98AB81]/30 bg-[#98AB81] px-6 py-4 text-white">
@@ -537,290 +534,207 @@ export default function CheckoutPage() {
         </form>
       </div>
 
-      {/* --- EMAIL VERIFICATION CODE MODAL --- */}
-      {isVerificationModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="relative w-full max-w-[440px] rounded-2xl bg-white p-7 shadow-2xl transition-all">
-            <button
-              type="button"
-              onClick={() => setIsVerificationModalOpen(false)}
-              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-gray-400 text-white hover:bg-gray-600 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            <h3 className="text-base font-bold text-[#3D2E24] pr-6 leading-snug">
-              Enter the code received on your email address ({email || "hadiqaehsan@gmail.com"}).
-            </h3>
-
-            <div className="mt-6 space-y-4">
+      {/* Address Modal */}
+      {isAddressModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-sm font-bold text-[#3D2E24]">Enter Delivery Address</h3>
+              <button onClick={() => setIsAddressModalOpen(false)} className="rounded-full p-1 text-gray-500 hover:bg-gray-100">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="mt-4 space-y-4">
               <div>
-                <label className="mb-2 block text-xs font-semibold text-[#3D2E24]">Code</label>
-                <div className="relative flex items-center">
-                  <Input
-                    type="text"
-                    placeholder="Enter Code"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    className="h-12 rounded-xl border border-gray-300 bg-white px-4 text-sm text-[#3D2E24] placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-[#98AB81] pr-14"
-                  />
-                  <span className="absolute right-4 text-sm font-medium text-gray-500">
-                    ({countdown.toString().padStart(2, "0")})
-                  </span>
-                </div>
+                <Label className="mb-1 block text-xs font-semibold text-[#3D2E24]">Street Address / House No.</Label>
+                <Input
+                  placeholder="e.g. House 123, Street 4"
+                  value={modalAddressInput}
+                  onChange={(e) => setModalAddressInput(e.target.value)}
+                  className="h-10 text-xs"
+                />
               </div>
-
+              <div>
+                <Label className="mb-1 block text-xs font-semibold text-[#3D2E24]">Area / Sector</Label>
+                <Input
+                  placeholder="e.g. DHA Phase 1, Rawalpindi"
+                  value={modalRegionInput}
+                  onChange={(e) => setModalRegionInput(e.target.value)}
+                  className="h-10 text-xs"
+                />
+              </div>
               <Button
-                type="button"
-                onClick={handleVerifyAndPlaceOrder}
-                className="w-full rounded-xl bg-[#98AB81] py-3.5 text-sm font-bold text-white transition-all hover:bg-[#83966c] hover:shadow-md active:scale-95"
+                onClick={handleSaveAddress}
+                className="w-full bg-[#98AB81] text-white hover:bg-[#83966c] font-semibold text-xs py-2.5 rounded-xl shadow-md"
               >
-                Verify & Place Order
+                Save Address
               </Button>
             </div>
           </div>
         </div>
       )}
 
-      {/* --- CONFIRMATION STATUS POPUP MODAL --- */}
-      {statusModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="relative w-full max-w-[400px] rounded-2xl bg-white p-6 shadow-2xl text-center transition-all animate-in fade-in zoom-in-95">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#F4F6F0]">
-              {statusModal.success ? (
-                <CheckCircle2 className="h-10 w-10 text-[#98AB81]" />
-              ) : (
-                <XCircle className="h-10 w-10 text-red-500" />
-              )}
-            </div>
-
-            <h3 className="mt-4 text-lg font-extrabold text-[#3D2E24]">
-              {statusModal.success ? "Order Confirmed!" : "Order Placement Failed"}
-            </h3>
-
-            <p className="mt-2 text-xs text-[#3D2E24]/70 leading-relaxed">{statusModal.message}</p>
-
-            <div className="mt-6">
-              {statusModal.success ? (
-                <Button
-                  onClick={() => {
-                    setStatusModal({ ...statusModal, open: false });
-                    router.push(`/order-confirmation/${statusModal.orderId}`);
-                  }}
-                  className="w-full rounded-xl bg-[#98AB81] py-3 text-sm font-bold text-white transition hover:bg-[#83966c]"
-                >
-                  View Order Details
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => setStatusModal({ ...statusModal, open: false })}
-                  className="w-full rounded-xl bg-[#3D2E24] py-3 text-sm font-bold text-white transition hover:bg-[#2A2018]"
-                >
-                  Try Again
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- ADD NEW ADDRESS MODAL --- */}
-      {isAddressModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="relative w-full max-w-[480px] rounded-2xl bg-white p-6 shadow-2xl transition-all">
-            <div className="flex items-center justify-between pb-4">
-              <h2 className="text-lg font-bold text-[#3D2E24]">Add new Address</h2>
-              <button
-                type="button"
-                onClick={() => setIsAddressModalOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-400/80 text-white hover:bg-gray-500 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-[#3D2E24]/80">
-                  Address (with post code if applicable)
-                </label>
-                <Input
-                  type="text"
-                  placeholder="Enter your complete street address"
-                  value={modalAddressInput}
-                  onChange={(e) => setModalAddressInput(e.target.value)}
-                  className="h-12 rounded-xl border border-gray-300 bg-white px-4 text-sm text-[#3D2E24] placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-[#98AB81]"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-[#3D2E24]/80">Region</label>
-                <Input
-                  type="text"
-                  placeholder="DHA Phase 1, Rawalpindi"
-                  value={modalRegionInput}
-                  onChange={(e) => setModalRegionInput(e.target.value)}
-                  className="h-12 rounded-xl border border-gray-300 bg-white px-4 text-sm text-[#3D2E24] placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-[#98AB81]"
-                />
-                <p className="mt-2 text-[11px] text-gray-500">
-                  To change your area/region, please do it from top header location button.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-xl border border-[#98AB81]/40 bg-[#F4F6F0] p-4 text-[#3D2E24]">
-                <MapPin className="h-6 w-6 text-[#98AB81] flex-shrink-0" />
-                <div className="text-xs">
-                  <p className="font-semibold">{modalRegionInput || "Delivery Location"}</p>
-                  <p className="text-[#3D2E24]/70">{modalAddressInput || "Street address will be pinned here"}</p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleSaveAddress}
-                disabled={!modalAddressInput.trim()}
-                className="mt-2 w-full rounded-xl bg-[#98AB81] py-3.5 text-sm font-bold text-white transition-all hover:bg-[#83966c] hover:shadow-md active:scale-95 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600"
-              >
-                Save Address
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* DATE & TIME PICKER MODAL */}
+      {/* Date & Time Picker Modal */}
       {isPickerOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="relative p-[4px] overflow-hidden rounded-[22px] shadow-[0_0_30px_rgba(152,171,129,0.8)] max-w-[360px] w-full">
-            <div className="absolute inset-[-150%] animate-neon-glow bg-[conic-gradient(from_0deg,#98AB81_0%,#ffffff_25%,#3D2E24_50%,#98AB81_75%,#ffffff_100%)] filter blur-[2px]" />
-
-            <div className="relative w-full overflow-hidden rounded-2xl bg-white shadow-inner">
-              <div className="bg-[#98AB81] p-5 text-white">
-                <div className="flex items-center justify-between text-xs uppercase tracking-wider text-white/90 font-bold">
-                  <span>SELECT DATE & TIME</span>
-                  <Pencil className="h-4 w-4 cursor-pointer hover:opacity-80 transition-opacity" />
-                </div>
-
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <div>
-                    <div className="text-xs font-semibold text-white/80">{selectedDate.getFullYear()}</div>
-                    <div className="text-2xl font-extrabold whitespace-nowrap">
-                      {selectedDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20">
-                    <div className="flex items-center gap-1 text-lg font-bold">
-                      <select 
-                        value={selectedHours} 
-                        onChange={(e) => setSelectedHours(e.target.value)}
-                        aria-label="Select hour"
-                        className="bg-transparent text-white outline-none cursor-pointer [&>option]:text-[#3D2E24]"
-                      >
-                        {Array.from({ length: 12 }, (_, i) => {
-                          const hour = (i + 1).toString();
-                          return <option key={hour} value={hour}>{hour.padStart(2, "0")}</option>;
-                        })}
-                      </select>
-                      <span>:</span>
-                      <select 
-                        value={selectedMinutes} 
-                        onChange={(e) => setSelectedMinutes(e.target.value)}
-                        aria-label="Select minute"
-                        className="bg-transparent text-white outline-none cursor-pointer [&>option]:text-[#3D2E24]"
-                      >
-                        {["00", "15", "30", "45"].map((min) => (
-                          <option key={min} value={min}>{min}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="flex rounded-lg bg-black/20 p-0.5 text-xs font-bold">
-                      <button
-                        type="button"
-                        onClick={() => setAmpm("AM")}
-                        className={`px-2 py-1 rounded-md transition-all ${ampm === "AM" ? "bg-white text-[#3D2E24]" : "text-white"}`}
-                      >
-                        AM
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAmpm("PM")}
-                        className={`px-2 py-1 rounded-md transition-all ${ampm === "PM" ? "bg-white text-[#3D2E24]" : "text-white"}`}
-                      >
-                        PM
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Calendar Grid Body */}
-              <div className="p-5 bg-white">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-bold text-[#3D2E24]">
-                    {viewDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button type="button" onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-[#F4F6F0] text-[#3D2E24]">
-                      <ChevronLeft className="h-4 w-4" />
-                    </button>
-                    <button type="button" onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-[#F4F6F0] text-[#3D2E24]">
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-[#3D2E24]/60 mb-2">
-                  <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-                </div>
-
-                <div className="grid grid-cols-7 gap-1 text-center text-xs">
-                  {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-                    <div key={`empty-${i}`} />
-                  ))}
-                  {Array.from({ length: daysInMonthCount }).map((_, i) => {
-                    const dayNum = i + 1;
-                    const isSelected =
-                      selectedDate.getDate() === dayNum &&
-                      selectedDate.getMonth() === viewDate.getMonth() &&
-                      selectedDate.getFullYear() === viewDate.getFullYear();
-
-                    return (
-                      <button
-                        key={dayNum}
-                        type="button"
-                        onClick={() => setSelectedDate(new Date(viewDate.getFullYear(), viewDate.getMonth(), dayNum))}
-                        className={`h-9 w-9 mx-auto flex items-center justify-center rounded-xl font-medium transition-all ${
-                          isSelected
-                            ? "bg-[#98AB81] text-white shadow-md scale-105 font-bold"
-                            : "text-[#3D2E24] hover:bg-[#F4F6F0]"
-                        }`}
-                      >
-                        {dayNum}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-6 flex items-center justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setIsPickerOpen(false)}
-                    className="text-xs text-[#3D2E24]/70 hover:bg-[#F4F6F0]"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={handleConfirmDateTime}
-                    className="rounded-xl bg-[#98AB81] px-5 py-2 text-xs font-bold text-white hover:bg-[#83966c]"
-                  >
-                    OK
-                  </Button>
-                </div>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-sm font-bold text-[#3D2E24]">Select Delivery Date & Time</h3>
+              <button onClick={() => setIsPickerOpen(false)} className="rounded-full p-1 text-gray-500 hover:bg-gray-100">
+                <X className="h-4 w-4" />
+              </button>
             </div>
+
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-[#3D2E24]">
+                  {viewDate.toLocaleString('default', { month: 'long' })} {viewDate.getFullYear()}
+                </span>
+                <div className="flex gap-1">
+                  <button onClick={prevMonth} className="p-1 rounded hover:bg-gray-100"><ChevronLeft className="h-4 w-4" /></button>
+                  <button onClick={nextMonth} className="p-1 rounded hover:bg-gray-100"><ChevronRight className="h-4 w-4" /></button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-gray-500 mb-2">
+                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+                  <div key={`empty-${i}`} />
+                ))}
+                {Array.from({ length: daysInMonthCount }).map((_, i) => {
+                  const dayNum = i + 1;
+                  const isSelected =
+                    selectedDate.getDate() === dayNum &&
+                    selectedDate.getMonth() === viewDate.getMonth() &&
+                    selectedDate.getFullYear() === viewDate.getFullYear();
+
+                  return (
+                    <button
+                      key={dayNum}
+                      type="button"
+                      onClick={() => setSelectedDate(new Date(viewDate.getFullYear(), viewDate.getMonth(), dayNum))}
+                      className={`h-7 w-7 mx-auto rounded-full flex items-center justify-center text-xs font-medium transition-all ${
+                        isSelected ? "bg-[#98AB81] text-white font-bold" : "hover:bg-gray-100 text-[#3D2E24]"
+                      }`}
+                    >
+                      {dayNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 border-t pt-3">
+                <label className="block text-xs font-semibold text-[#3D2E24] mb-1">Time</label>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={selectedHours}
+                    onChange={(e) => setSelectedHours(e.target.value)}
+                    className="rounded-lg border border-gray-300 p-1.5 text-xs bg-white"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((h) => (
+                      <option key={h} value={String(h).padStart(2, "0")}>{String(h).padStart(2, "0")}</option>
+                    ))}
+                  </select>
+                  <span>:</span>
+                  <select
+                    value={selectedMinutes}
+                    onChange={(e) => setSelectedMinutes(e.target.value)}
+                    className="rounded-lg border border-gray-300 p-1.5 text-xs bg-white"
+                  >
+                    {["00", "15", "30", "45"].map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={ampm}
+                    onChange={(e) => setAmpm(e.target.value as "AM" | "PM")}
+                    className="rounded-lg border border-gray-300 p-1.5 text-xs bg-white"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleConfirmDateTime}
+                className="mt-5 w-full bg-[#98AB81] text-white hover:bg-[#83966c] text-xs py-2.5 rounded-xl font-semibold shadow-md"
+              >
+                Confirm Date & Time
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Verification Code Modal */}
+      {isVerificationModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center">
+            <h3 className="text-base font-bold text-[#3D2E24] mb-2">Verify Your Order</h3>
+            <p className="text-xs text-gray-500 mb-4">Please enter the 4-digit code sent to your phone or email.</p>
+            <Input
+              type="text"
+              maxLength={4}
+              placeholder="1234"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              className="h-12 text-center text-lg tracking-widest mb-4"
+            />
+            <div className="text-xs text-gray-400 mb-4">
+              Resend code in <span className="font-semibold text-[#3D2E24]">{countdown}s</span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsVerificationModalOpen(false)}
+                className="w-1/2 rounded-xl text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleVerifyAndPlaceOrder}
+                className="w-1/2 bg-[#98AB81] text-white hover:bg-[#83966c] rounded-xl text-xs font-semibold"
+              >
+                Verify & Place
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Status Modal */}
+      {statusModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+              {statusModal.success ? (
+                <CheckCircle2 className="h-8 w-8 text-green-600" />
+              ) : (
+                <XCircle className="h-8 w-8 text-red-600" />
+              )}
+            </div>
+            <h3 className="text-base font-bold text-[#3D2E24] mb-1">
+              {statusModal.success ? "Order Confirmed!" : "Order Failed"}
+            </h3>
+            <p className="text-xs text-gray-600 mb-4">{statusModal.message}</p>
+            {statusModal.success && statusModal.orderId && (
+              <p className="text-[11px] text-gray-400 mb-4">Order ID: {statusModal.orderId}</p>
+            )}
+            <Button
+              onClick={() => {
+                setStatusModal({ open: false, success: false, message: "" });
+                if (statusModal.success) {
+                  router.push("/orders");
+                }
+              }}
+              className="w-full bg-[#98AB81] text-white hover:bg-[#83966c] text-xs py-2.5 rounded-xl font-semibold"
+            >
+              {statusModal.success ? "View Orders" : "Try Again"}
+            </Button>
           </div>
         </div>
       )}
