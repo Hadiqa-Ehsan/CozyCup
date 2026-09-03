@@ -7,12 +7,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/cart-store";
 import { useBranchStore } from "@/store/branch-store";
-import { formatPrice } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Plus,
   Banknote,
   CreditCard,
   Wallet,
@@ -25,6 +23,7 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
+  Plus,
 } from "lucide-react";
 
 export default function CheckoutPage() {
@@ -32,10 +31,11 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   const { items, clear } = useCartStore();
   const { branch, fulfillmentType } = useBranchStore();
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -76,14 +76,11 @@ export default function CheckoutPage() {
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    if (mounted && status === "unauthenticated") {
-      router.push("/login?next=/checkout");
-    }
     if (session?.user) {
       if (session.user.name && !name) setName(session.user.name);
       if (session.user.email && !email) setEmail(session.user.email);
     }
-  }, [mounted, status, router, session, name, email]);
+  }, [session, name, email]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -93,7 +90,7 @@ export default function CheckoutPage() {
     return () => clearInterval(timer);
   }, [isVerificationModalOpen, countdown]);
 
-  if (!mounted || status !== "authenticated") return null;
+  if (!mounted) return null;
 
   if (items.length === 0) {
     return (
@@ -141,7 +138,6 @@ export default function CheckoutPage() {
     return acc + price * qty;
   }, 0);
 
-  // deliveryFeeCents is already in cents, convert to rupees for display
   const deliveryFeeRupees = deliveryFeeCents / 100;
   const grandTotal = calculatedTotal + deliveryFeeRupees;
 
@@ -204,7 +200,7 @@ export default function CheckoutPage() {
             productId: i.productId,
             name: i.name,
             quantity: i.quantity || 1,
-            unitPriceCents: Math.round(getItemPrice(i) * 100), // Convert to cents for API
+            unitPriceCents: Math.round(getItemPrice(i) * 100),
           })),
         }),
       });
@@ -250,12 +246,21 @@ export default function CheckoutPage() {
       `}</style>
 
       <div className="mx-auto max-w-7xl">
-        <nav className="mb-6 flex items-center gap-1.5 text-xs text-[#3D2E24]/70">
-          <Link href="/" className="hover:text-[#98AB81] transition-colors">
-            Home
+        <nav className="mb-6 flex items-center justify-between text-xs text-[#3D2E24]/70">
+          <div className="flex items-center gap-1.5">
+            <Link href="/" className="hover:text-[#98AB81] transition-colors">
+              Home
+            </Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="font-semibold text-[#98AB81]">Checkout</span>
+          </div>
+          <Link
+            href="/shop"
+            className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 shadow-sm border border-[#98AB81]/30 text-[#3D2E24] hover:bg-[#98AB81] hover:text-white transition-all font-medium"
+          >
+            <X className="h-3.5 w-3.5" />
+            <span>Cancel & Return</span>
           </Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="font-semibold text-[#98AB81]">Checkout</span>
         </nav>
 
         {error && (
@@ -688,34 +693,43 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 bg-black/15 px-3 py-2 rounded-xl border border-white/30 shadow-inner">
-                    <input
-                      type="text"
-                      maxLength={2}
-                      value={selectedHours}
-                      onChange={(e) => setSelectedHours(e.target.value)}
-                      className="w-7 bg-transparent text-center text-lg font-bold text-white outline-none"
-                    />
-                    <span className="text-lg font-bold text-white/80">:</span>
-                    <input
-                      type="text"
-                      maxLength={2}
-                      value={selectedMinutes}
-                      onChange={(e) => setSelectedMinutes(e.target.value)}
-                      className="w-7 bg-transparent text-center text-lg font-bold text-white outline-none"
-                    />
-                    <div className="flex flex-col text-[10px] font-bold ml-1">
+                  <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20">
+                    <div className="flex items-center gap-1 text-lg font-bold">
+                      <select 
+                        value={selectedHours} 
+                        onChange={(e) => setSelectedHours(e.target.value)}
+                        aria-label="Select hour"
+                        className="bg-transparent text-white outline-none cursor-pointer [&>option]:text-[#3D2E24]"
+                      >
+                        {Array.from({ length: 12 }, (_, i) => {
+                          const hour = (i + 1).toString();
+                          return <option key={hour} value={hour}>{hour.padStart(2, "0")}</option>;
+                        })}
+                      </select>
+                      <span>:</span>
+                      <select 
+                        value={selectedMinutes} 
+                        onChange={(e) => setSelectedMinutes(e.target.value)}
+                        aria-label="Select minute"
+                        className="bg-transparent text-white outline-none cursor-pointer [&>option]:text-[#3D2E24]"
+                      >
+                        {["00", "15", "30", "45"].map((min) => (
+                          <option key={min} value={min}>{min}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex rounded-lg bg-black/20 p-0.5 text-xs font-bold">
                       <button
                         type="button"
                         onClick={() => setAmpm("AM")}
-                        className={`hover:opacity-100 ${ampm === "AM" ? "text-white underline" : "text-white/60"}`}
+                        className={`px-2 py-1 rounded-md transition-all ${ampm === "AM" ? "bg-white text-[#3D2E24]" : "text-white"}`}
                       >
                         AM
                       </button>
                       <button
                         type="button"
                         onClick={() => setAmpm("PM")}
-                        className={`hover:opacity-100 ${ampm === "PM" ? "text-white underline" : "text-white/60"}`}
+                        className={`px-2 py-1 rounded-md transition-all ${ampm === "PM" ? "bg-white text-[#3D2E24]" : "text-white"}`}
                       >
                         PM
                       </button>
@@ -724,31 +738,23 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Calendar Control */}
-              <div className="p-4 bg-white">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold text-[#3D2E24]">
-                    {viewDate.toLocaleString("default", { month: "long" })} {viewDate.getFullYear()}
+              {/* Calendar Grid Body */}
+              <div className="p-5 bg-white">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-bold text-[#3D2E24]">
+                    {viewDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
                   </span>
                   <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={prevMonth}
-                      className="p-1 rounded-lg hover:bg-gray-100 text-[#3D2E24]"
-                    >
+                    <button type="button" onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-[#F4F6F0] text-[#3D2E24]">
                       <ChevronLeft className="h-4 w-4" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={nextMonth}
-                      className="p-1 rounded-lg hover:bg-gray-100 text-[#3D2E24]"
-                    >
+                    <button type="button" onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-[#F4F6F0] text-[#3D2E24]">
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-gray-400 mb-1">
+                <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-[#3D2E24]/60 mb-2">
                   <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
                 </div>
 
@@ -768,10 +774,10 @@ export default function CheckoutPage() {
                         key={dayNum}
                         type="button"
                         onClick={() => setSelectedDate(new Date(viewDate.getFullYear(), viewDate.getMonth(), dayNum))}
-                        className={`h-8 w-8 mx-auto flex items-center justify-center rounded-full font-semibold transition-all ${
+                        className={`h-9 w-9 mx-auto flex items-center justify-center rounded-xl font-medium transition-all ${
                           isSelected
-                            ? "bg-[#98AB81] text-white shadow-sm"
-                            : "hover:bg-[#F4F6F0] text-[#3D2E24]"
+                            ? "bg-[#98AB81] text-white shadow-md scale-105 font-bold"
+                            : "text-[#3D2E24] hover:bg-[#F4F6F0]"
                         }`}
                       >
                         {dayNum}
@@ -780,19 +786,19 @@ export default function CheckoutPage() {
                   })}
                 </div>
 
-                <div className="mt-5 flex items-center justify-end gap-2 border-t pt-3">
+                <div className="mt-6 flex items-center justify-end gap-2">
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => setIsPickerOpen(false)}
-                    className="text-xs text-gray-500 hover:text-gray-700"
+                    className="text-xs text-[#3D2E24]/70 hover:bg-[#F4F6F0]"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="button"
                     onClick={handleConfirmDateTime}
-                    className="bg-[#98AB81] text-white hover:bg-[#83966c] text-xs font-bold px-4 py-2 rounded-xl"
+                    className="rounded-xl bg-[#98AB81] px-5 py-2 text-xs font-bold text-white hover:bg-[#83966c]"
                   >
                     OK
                   </Button>
