@@ -31,11 +31,21 @@ function LoginForm() {
   const [showRegisterMessage, setShowRegisterMessage] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  // Handled both callbackUrl and next for robust param retrieval
-  const next = searchParams.get("callbackUrl") || searchParams.get("next") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || searchParams.get("next") || "/";
+
+  const handleClose = () => {
+    if (callbackUrl && callbackUrl !== "/login") {
+      router.push(callbackUrl);
+    } else if (window.history.length > 2) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
 
   const {
     register,
@@ -80,7 +90,13 @@ function LoginForm() {
       }
     } else {
       setSuccess(true);
-      setTimeout(() => router.push(next), 1500);
+      setTimeout(() => {
+        if (callbackUrl && callbackUrl !== "/login") {
+          router.push(callbackUrl);
+        } else {
+          router.push("/");
+        }
+      }, 1500);
     }
   }
 
@@ -107,16 +123,10 @@ function LoginForm() {
         {/* Card Container */}
         <div className="relative w-full rounded-[22px] bg-[#F6F4EB] p-7 shadow-2xl">
           
-          {/* Close Button with safe window history fallback */}
+          {/* Close Button */}
           <button
             type="button"
-            onClick={() => {
-              if (window.history.length > 2) {
-                router.back();
-              } else {
-                router.push("/");
-              }
-            }}
+            onClick={handleClose}
             className="absolute right-4 top-4 rounded-full bg-gray-400/30 p-1.5 text-[#3D2E24] hover:bg-gray-400/50 transition"
             aria-label="Close"
           >
