@@ -39,11 +39,11 @@ function LoginForm() {
 
   const handleClose = () => {
     if (callbackUrl && callbackUrl !== "/login") {
-      router.push(callbackUrl);
+      window.location.href = callbackUrl;
     } else if (window.history.length > 2) {
-      router.back();
+      window.history.back();
     } else {
-      router.push("/");
+      window.location.href = "/";
     }
   };
 
