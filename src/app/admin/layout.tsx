@@ -173,7 +173,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <h3 className="text-xs font-bold uppercase tracking-widest text-[#BDD390]">Contact</h3>
             <ul className="mt-4 space-y-2 text-xs font-medium text-[#F3EDD8]/80">
               <li><a href="tel:+923004805000" className="hover:text-[#BDD390] underline">+92 300 4805000</a></li>
-              <li><a href="mailto:Info@CozyCup.com.pk" className="hover:text-[#BDD390] underline">Info@CozyCup.com.pk</a></li>
+              <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=Info@CozyCup.com.pk&su=Inquiry%20from%20Admin&body=Hello%20Cozy%20Cup%20Team," target="_blank" rel="noopener noreferrer" className="hover:text-[#BDD390] underline">Info@CozyCup.com.pk</a></li>
               <li className="text-[#F3EDD8]/60">5 branches • citywide</li>
             </ul>
           </div>
