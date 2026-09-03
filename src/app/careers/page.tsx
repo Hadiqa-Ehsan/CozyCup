@@ -57,7 +57,9 @@ export default function CareersPage() {
                 <p className="text-xs text-[#F3EDD8]/70">Send your updated CV and cover letter directly to our HR team.</p>
               </div>
               <a 
-                href="mailto:Info@CozyCup.com.pk?subject=Job Application - Cozy Cup"
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=Info@CozyCup.com.pk&su=Job%20Application%20-%20Cozy%20Cup&body=Hello%20Cozy%20Cup%20Team,%0A%0AI%20am%20interested%20in%20applying%20for%20a%20position%20at%20your%20company."
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#BDD390] text-[#2D231F] text-xs font-black shadow hover:bg-white transition whitespace-nowrap"
               >
                 <Mail className="h-4 w-4" /> Apply via Email
