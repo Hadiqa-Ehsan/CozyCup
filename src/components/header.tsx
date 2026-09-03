@@ -77,10 +77,9 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // City, Branch Name, aur Order Type (Pickup/Delivery) teenon show hon gay
-  const orderTypeName = branch?.orderType === "pickup" ? "Pickup" : "Delivery";
+  // Sirf City aur Branch Name show hoga (bracket wala order type remove kar diya hai)
   const displayLabel = branch?.name 
-    ? `${branch.city ? branch.city + " - " : ""}${branch.name} (${orderTypeName})` 
+    ? `${branch.city ? branch.city + " - " : ""}${branch.name}` 
     : "Select Location";
     
   const orderTypeLabel = branch?.orderType === "delivery" ? "Delivery from" : "Pick-Up from";
