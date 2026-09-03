@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   ShoppingBag,
   Users,
@@ -57,6 +57,17 @@ export default function AdminDashboard() {
   const [revenuePeriod, setRevenuePeriod] = useState<"weekly" | "monthly">("weekly");
   const [orders, setOrders] = useState(initialOrders);
 
+  // Highlight state tracking IDs
+  const [highlightedOrderId, setHighlightedOrderId] = useState<string | null>(null);
+  const [highlightedProductId, setHighlightedProductId] = useState<string | null>(null);
+  const [highlightedUserId, setHighlightedUserId] = useState<string | null>(null);
+
+  // Refs for smooth scrolling to sections
+  const ordersSectionRef = useRef<HTMLDivElement>(null);
+  const popularSectionRef = useRef<HTMLDivElement>(null);
+  const orderItemRefs = useRef<{ [key: string]: HTMLTableRowElement | null }>({});
+  const productItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
   const [notifications, setNotifications] = useState([
     { id: 1, title: "New Order Placed", desc: "Hadiqa Ehsan placed a new store order ORD-1001", time: "2m ago", read: false },
     { id: 2, title: "Low Stock Alert", desc: "Select bakery inventory is running below threshold", time: "15m ago", read: false },
@@ -97,6 +108,26 @@ export default function AdminDashboard() {
 
     return { matchedOrders, matchedProducts, matchedUsers };
   }, [searchQuery, orders]);
+
+  // Handle clicking an item from search dropdown
+  const handleSelectSearchResult = (type: "order" | "product" | "user", id: string) => {
+    setSearchQuery(""); // Clear search to close dropdown
+
+    if (type === "order") {
+      ordersSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setHighlightedOrderId(id);
+      setTimeout(() => setHighlightedOrderId(null), 3000);
+    } else if (type === "product") {
+      popularSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setHighlightedProductId(id);
+      setTimeout(() => setHighlightedProductId(null), 3000);
+    } else if (type === "user") {
+      // Since users table isn't displayed directly on dashboard bottom, scroll to orders/top or handle gracefully
+      ordersSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setHighlightedUserId(id);
+      setTimeout(() => setHighlightedUserId(null), 3000);
+    }
+  };
 
   const categoryBreakdown = useMemo(() => {
     const categoryMap: { [key: string]: number } = {};
@@ -173,7 +204,7 @@ export default function AdminDashboard() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search orders, products..."
+              placeholder="Search orders, products, users..."
               className="rounded-2xl border border-[#BDD390] bg-white/70 py-2.5 pl-10 pr-8 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 backdrop-blur-md shadow-sm transition-all w-72"
             />
             {searchQuery && (
@@ -185,12 +216,12 @@ export default function AdminDashboard() {
               </button>
             )}
 
-            {/* Live Search Popup Dropdown (Without Navigation/Action) */}
+            {/* Interactive Clickable Search Popup Dropdown */}
             {searchQuery.trim().length > 0 && (
               <div className="absolute left-0 right-0 mt-2 rounded-2xl bg-[#F3EDD8] border border-[#BDD390] shadow-2xl z-[9999] overflow-hidden backdrop-blur-xl">
                 <div className="p-2 border-b border-[#BDD390] bg-white/40 flex items-center justify-between text-[10px] font-bold uppercase text-[#3D2E24]/70 px-3">
                   <span>Search Results</span>
-                  <span>Suggestions</span>
+                  <span>Click to locate</span>
                 </div>
                 <div className="max-h-64 overflow-y-auto p-1 space-y-1">
                   {searchResults.matchedOrders.length === 0 && searchResults.matchedProducts.length === 0 && searchResults.matchedUsers.length === 0 ? (
@@ -198,7 +229,11 @@ export default function AdminDashboard() {
                   ) : (
                     <>
                       {searchResults.matchedOrders.map(o => (
-                        <div key={o.id} className="flex items-center justify-between p-2 rounded-xl bg-white/30 text-xs">
+                        <div 
+                          key={o.id} 
+                          onClick={() => handleSelectSearchResult("order", o.id)}
+                          className="flex items-center justify-between p-2 rounded-xl bg-white/50 hover:bg-[#BDD390] cursor-pointer text-xs transition-all"
+                        >
                           <div>
                             <span className="font-black text-[#3D2E24]">{o.id}</span>
                             <span className="text-[#3D2E24]/70 ml-2">({o.customerName})</span>
@@ -207,7 +242,11 @@ export default function AdminDashboard() {
                         </div>
                       ))}
                       {searchResults.matchedProducts.map((p: any) => (
-                        <div key={p.id} className="flex items-center justify-between p-2 rounded-xl bg-white/30 text-xs">
+                        <div 
+                          key={p.id} 
+                          onClick={() => handleSelectSearchResult("product", p.id)}
+                          className="flex items-center justify-between p-2 rounded-xl bg-white/50 hover:bg-[#BDD390] cursor-pointer text-xs transition-all"
+                        >
                           <div>
                             <span className="font-black text-[#3D2E24]">{p.name}</span>
                           </div>
@@ -215,7 +254,11 @@ export default function AdminDashboard() {
                         </div>
                       ))}
                       {searchResults.matchedUsers.map(u => (
-                        <div key={u.id} className="flex items-center justify-between p-2 rounded-xl bg-white/30 text-xs">
+                        <div 
+                          key={u.id} 
+                          onClick={() => handleSelectSearchResult("user", u.id)}
+                          className="flex items-center justify-between p-2 rounded-xl bg-white/50 hover:bg-[#BDD390] cursor-pointer text-xs transition-all"
+                        >
                           <div>
                             <span className="font-black text-[#3D2E24]">{u.name}</span>
                             <span className="text-[#3D2E24]/60 ml-2 text-[10px]">{u.role}</span>
@@ -380,7 +423,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Popular Items Section */}
-      <div className="space-y-4 relative z-10">
+      <div ref={popularSectionRef} className="space-y-4 relative z-10 scroll-mt-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-[#3D2E24] flex items-center gap-2">
             <Coffee className="h-5 w-5 text-[#3D2E24]" /> Popular CozyCup Items
@@ -389,30 +432,37 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {popularDishes.map((dish) => (
-            <div 
-              key={dish.id} 
-              className="rounded-3xl p-5 backdrop-blur-[12px] border bg-[#F3EDD8]/50 border-[#BDD390]/60 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-[#3D2E24]"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-[11px] font-bold bg-[#3D2E24] text-[#BDD390] px-2.5 py-1 rounded-full shadow-sm">
-                  {dish.tag}
-                </span>
-                <span className="text-xs font-bold text-[#3D2E24]/60">{dish.orders}</span>
+          {popularDishes.map((dish) => {
+            const isHighlighted = highlightedProductId === dish.id;
+            return (
+              <div 
+                key={dish.id} 
+                className={`rounded-3xl p-5 backdrop-blur-[12px] border transition-all duration-500 ${
+                  isHighlighted 
+                    ? "bg-[#BDD390] border-[#3D2E24] ring-4 ring-[#3D2E24]/30 scale-[1.03] shadow-2xl animate-pulse" 
+                    : "bg-[#F3EDD8]/50 border-[#BDD390]/60 shadow-md hover:-translate-y-1.5 hover:shadow-xl hover:border-[#3D2E24]"
+                }`}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-[11px] font-bold bg-[#3D2E24] text-[#BDD390] px-2.5 py-1 rounded-full shadow-sm">
+                    {dish.tag}
+                  </span>
+                  <span className="text-xs font-bold text-[#3D2E24]/60">{dish.orders}</span>
+                </div>
+                <h3 className="text-base font-black text-[#3D2E24] mt-2">{dish.name}</h3>
+                <p className="text-xs text-[#3D2E24]/70">{dish.category}</p>
+                <div className="mt-4 flex items-center justify-between pt-3 border-t border-[#BDD390]/40">
+                  <span className="text-sm font-black text-[#3D2E24]">{dish.price}</span>
+                  <span className="text-xs font-bold text-emerald-800 bg-[#BDD390]/60 px-2.5 py-1 rounded-xl">Available</span>
+                </div>
               </div>
-              <h3 className="text-base font-black text-[#3D2E24] mt-2">{dish.name}</h3>
-              <p className="text-xs text-[#3D2E24]/70">{dish.category}</p>
-              <div className="mt-4 flex items-center justify-between pt-3 border-t border-[#BDD390]/40">
-                <span className="text-sm font-black text-[#3D2E24]">{dish.price}</span>
-                <span className="text-xs font-bold text-emerald-800 bg-[#BDD390]/60 px-2.5 py-1 rounded-xl">Available</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       {/* Recent Orders Section */}
-      <div className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md relative z-10">
+      <div ref={ordersSectionRef} className="rounded-3xl bg-[#F3EDD8]/40 p-6 backdrop-blur-[12px] border border-[#BDD390]/60 shadow-md relative z-10 scroll-mt-6">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
             <h2 className="text-lg font-black text-[#3D2E24]">Recent Customer Orders</h2>
@@ -438,7 +488,8 @@ export default function AdminDashboard() {
               {orders.map((order) => {
                 const orderTotal = order.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
                 const itemsSummary = order.items.map(i => `${i.quantity}x ${i.name}`).join(", ");
-                
+                const isHighlighted = highlightedOrderId === order.id || highlightedUserId === order.customerName;
+
                 const statusBadge = 
                   order.status === "Pending" ? (
                     <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-amber-200 text-amber-900 border border-amber-300 animate-pulse">
@@ -456,7 +507,14 @@ export default function AdminDashboard() {
                   );
 
                 return (
-                  <tr key={order.id} className="transition-colors hover:bg-white/40">
+                  <tr 
+                    key={order.id} 
+                    className={`transition-all duration-500 ${
+                      isHighlighted 
+                        ? "bg-[#BDD390] ring-2 ring-[#3D2E24] scale-[1.01] shadow-lg animate-pulse" 
+                        : "hover:bg-white/40"
+                    }`}
+                  >
                     <td className="py-4 text-xs font-bold text-[#3D2E24]">{order.id}</td>
                     <td className="py-4 text-xs font-medium text-[#3D2E24]">{order.customerName}</td>
                     <td className="py-4 text-xs font-medium text-[#3D2E24]/80 max-w-xs truncate">{itemsSummary}</td>
