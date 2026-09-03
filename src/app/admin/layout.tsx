@@ -15,10 +15,12 @@ import {
   Globe,
   Share2,
   MessageCircle,
-  Home
+  Home,
+  Search,
+  Bell
 } from "lucide-react";
-import { useState } from "react";
-
+import { useState, useMemo } from "react";
+import { mockProducts } from "../../lib/mock-data";
 const navItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Products", href: "/admin/products", icon: Package },
@@ -27,10 +29,66 @@ const navItems = [
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
+const mockOrders = [
+  { id: "ORD-1001", customerName: "Hadiqa Ehsan", status: "Delivered" },
+  { id: "ORD-1002", customerName: "Ali Khan", status: "Processing" },
+  { id: "ORD-1003", customerName: "Sara Ahmed", status: "Pending" }
+];
+
+const mockUsersList = [
+  { id: "u1", name: "Hadiqa Ehsan", email: "hadiqa@cozycup.com", role: "Admin" },
+  { id: "u2", name: "Ali Khan", email: "ali@gmail.com", role: "Customer" },
+  { id: "u3", name: "Sara Ahmed", email: "sara@gmail.com", role: "Customer" }
+];
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: "New Order Placed", desc: "Hadiqa Ehsan placed a new store order ORD-1001", time: "2m ago", read: false },
+    { id: 2, title: "Low Stock Alert", desc: "Select bakery inventory is running below threshold", time: "15m ago", read: false },
+    { id: 3, title: "System Sync", desc: "Database successfully synced with backend", time: "1h ago", read: true },
+  ]);
+
+  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+
+  const markAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  };
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return { matchedOrders: [], matchedProducts: [], matchedUsers: [] };
+    const q = searchQuery.toLowerCase();
+
+    const matchedOrders = mockOrders.filter(
+      o => o.id.toLowerCase().includes(q) || o.customerName.toLowerCase().includes(q)
+    );
+
+    const matchedProducts = mockProducts.filter(
+      (p: any) => p.name.toLowerCase().includes(q) || (p.categorySlug && p.categorySlug.toLowerCase().includes(q))
+    );
+
+    const matchedUsers = mockUsersList.filter(
+      u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    );
+
+    return { matchedOrders, matchedProducts, matchedUsers };
+  }, [searchQuery]);
+
+  const handleSelectSearchResult = (type: "order" | "product" | "user") => {
+    setSearchQuery("");
+    if (type === "order") {
+      router.push("/admin/orders");
+    } else if (type === "product") {
+      router.push("/admin/products");
+    } else if (type === "user") {
+      router.push("/admin/users");
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("admin_auth");
@@ -63,6 +121,122 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
+
+      {/* Global Header Bar with Search & Notifications */}
+      <div className="mx-auto w-full max-w-7xl mb-6 flex justify-end items-center gap-3 relative z-30">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3D2E24]/50" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search orders, products, users..."
+            className="rounded-2xl border border-[#BDD390] bg-white/80 py-2.5 pl-10 pr-8 text-sm font-medium text-[#3D2E24] placeholder-[#3D2E24]/40 focus:outline-none focus:ring-2 focus:ring-[#3D2E24]/20 backdrop-blur-md shadow-sm transition-all w-72"
+          />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-[#3D2E24]/10 rounded-full p-1 hover:bg-[#3D2E24]/20"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+
+          {/* Global Search Results Dropdown */}
+          {searchQuery.trim().length > 0 && (
+            <div className="absolute left-0 right-0 mt-2 rounded-2xl bg-[#F3EDD8] border border-[#BDD390] shadow-2xl z-[99999] overflow-hidden backdrop-blur-xl pointer-events-auto">
+              <div className="p-2 border-b border-[#BDD390] bg-white/40 flex items-center justify-between text-[10px] font-bold uppercase text-[#3D2E24]/70 px-3">
+                <span>Global Search</span>
+                <span>Click to open page</span>
+              </div>
+              <div className="max-h-64 overflow-y-auto p-1 space-y-1">
+                {searchResults.matchedOrders.length === 0 && searchResults.matchedProducts.length === 0 && searchResults.matchedUsers.length === 0 ? (
+                  <div className="p-3 text-center text-xs text-[#3D2E24]/60">No matches found</div>
+                ) : (
+                  <>
+                    {searchResults.matchedOrders.map(o => (
+                      <div 
+                        key={o.id} 
+                        onClick={() => handleSelectSearchResult("order")}
+                        className="flex items-center justify-between p-2 rounded-xl bg-white/70 hover:bg-[#BDD390] cursor-pointer text-xs transition-all select-none"
+                      >
+                        <div>
+                          <span className="font-black text-[#3D2E24]">{o.id}</span>
+                          <span className="text-[#3D2E24]/70 ml-2">({o.customerName})</span>
+                        </div>
+                        <span className="text-[10px] bg-[#3D2E24] text-[#BDD390] px-2 py-0.5 rounded-full font-bold">Orders</span>
+                      </div>
+                    ))}
+                    {searchResults.matchedProducts.map((p: any) => (
+                      <div 
+                        key={p.id} 
+                        onClick={() => handleSelectSearchResult("product")}
+                        className="flex items-center justify-between p-2 rounded-xl bg-white/70 hover:bg-[#BDD390] cursor-pointer text-xs transition-all select-none"
+                      >
+                        <div>
+                          <span className="font-black text-[#3D2E24]">{p.name}</span>
+                        </div>
+                        <span className="text-[10px] bg-emerald-800 text-white px-2 py-0.5 rounded-full font-bold">Products</span>
+                      </div>
+                    ))}
+                    {searchResults.matchedUsers.map(u => (
+                      <div 
+                        key={u.id} 
+                        onClick={() => handleSelectSearchResult("user")}
+                        className="flex items-center justify-between p-2 rounded-xl bg-white/70 hover:bg-[#BDD390] cursor-pointer text-xs transition-all select-none"
+                      >
+                        <div>
+                          <span className="font-black text-[#3D2E24]">{u.name}</span>
+                          <span className="text-[#3D2E24]/60 ml-2 text-[10px]">{u.role}</span>
+                        </div>
+                        <span className="text-[10px] bg-blue-800 text-white px-2 py-0.5 rounded-full font-bold">Users</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Notifications Toggle */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative rounded-2xl bg-white/90 p-3 text-[#3D2E24] border border-[#BDD390] hover:bg-[#3D2E24] hover:text-white shadow-sm transition-all hover:scale-105"
+          >
+            <Bell className="h-4 w-4" />
+            {unreadNotificationsCount > 0 && (
+              <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse border border-white" />
+            )}
+          </button>
+
+          {showNotifications && (
+            <div className="absolute right-0 mt-3 w-80 rounded-3xl bg-[#F3EDD8] p-4 border border-[#BDD390] shadow-2xl z-[999] backdrop-blur-xl">
+              <div className="flex items-center justify-between pb-3 border-b border-[#BDD390]">
+                <span className="text-xs font-black uppercase tracking-wider text-[#3D2E24]">Notifications</span>
+                <div className="flex items-center gap-2">
+                  <button onClick={markAllAsRead} className="text-[10px] font-bold text-[#3D2E24]/70 hover:underline">Mark read</button>
+                  <button onClick={() => setShowNotifications(false)} className="text-[#3D2E24] hover:bg-[#BDD390]/50 p-1 rounded-full">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+              <div className="mt-3 space-y-2 max-h-64 overflow-y-auto pr-1">
+                {notifications.map((n) => (
+                  <div key={n.id} className={`p-3 rounded-2xl transition-all border ${n.read ? 'bg-white/40 border-transparent' : 'bg-white/90 border-[#BDD390] shadow-sm'}`}>
+                    <div className="flex justify-between items-start">
+                      <h4 className="text-xs font-black text-[#3D2E24]">{n.title}</h4>
+                      <span className="text-[10px] text-[#3D2E24]/60">{n.time}</span>
+                    </div>
+                    <p className="text-[11px] text-[#3D2E24]/80 mt-1">{n.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="mx-auto flex w-full max-w-7xl gap-6 flex-1">
         {/* Sidebar */}
